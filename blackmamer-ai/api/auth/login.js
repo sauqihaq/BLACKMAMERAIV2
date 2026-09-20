@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Format email tidak valid." });
   }
 
-  const issued = issueOtp(cleanEmail);
+  const issued = await issueOtp(cleanEmail);
   if (issued.cooldown) {
     return res.status(429).json({ error: `Tunggu ${issued.cooldown} detik sebelum minta kode lagi.` });
   }
