@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BlackMamer AI</title>
+<meta name="description" content="Chat AI premium — login aman, verifikasi OTP, pilih agent sendiri.">
+<meta name="color-scheme" content="dark light">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b0b0e'/%3E%3Cpath d='M9 22V10h7a3.5 3.5 0 0 1 0 7H9m7 0a3 3 0 0 1 0 5H9' fill='none' stroke='%23e6b95c' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07070a;
+  --bg-2: #0c0b10;
+  --ink: #f3efe6;
+  --muted: #948d7d;
+  --muted-2: #5f5a4f;
+  --gold: #d9ad5c;
+  --gold-bright: #f2cc86;
+  --gold-dim: #8a6f3d;
+  --glass: rgba(255,255,255,.045);
+  --glass-strong: rgba(255,255,255,.07);
+  --glass-border: rgba(217,173,92,.22);
+  --glass-border-soft: rgba(255,255,255,.09);
+  --danger: #e2795a;
+  --code-bg: #0a0a0c;
+  --shadow: 0 30px 80px -30px rgba(0,0,0,.7);
+  --f-display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --f-code: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+html[data-theme="light"] {
+  --bg: #eee9de;
+  --bg-2: #e6dfd0;
+  --ink: #1c1712;
+  --muted: #6e6555;
+  --muted-2: #a89d87;
+  --gold: #a87a22;
+  --gold-bright: #8a621a;
+  --gold-dim: #c9a35c;
+  --glass: rgba(255,255,255,.5);
+  --glass-strong: rgba(255,255,255,.72);
+  --glass-border: rgba(168,122,34,.28);
+  --glass-border-soft: rgba(28,23,18,.1);
+  --danger: #b8492c;
+  --code-bg: #1c1712;
+  --shadow: 0 30px 70px -35px rgba(28,23,18,.35);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; color-scheme: dark; }
+html[data-theme="light"] { color-scheme: light; }
+body {
+  margin: 0; min-height: 100dvh;
+  background: var(--bg); color: var(--ink);
+  font-family: var(--f-body);
+  transition: background .4s ease, color .4s ease;
+  overflow-x: hidden;
+}
+::selection { background: var(--gold); color: #17130a; }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 2px; }
+a { color: inherit; }
+
+/* ---------- ambient background ---------- */
+.veil {
+  position: fixed; inset: 0; z-index: -1; overflow: hidden;
+  background: var(--bg);
+}
+.veil i {
+  position: absolute; display: block; border-radius: 50%;
+  filter: blur(70px); opacity: .5;
+  animation: drift 26s ease-in-out infinite alternate;
+}
+.veil i:nth-child(1) { width: 46vmax; height: 46vmax; top: -18vmax; left: -12vmax; background: radial-gradient(circle, rgba(217,173,92,.32), transparent 70%); }
+.veil i:nth-child(2) { width: 40vmax; height: 40vmax; bottom: -16vmax; right: -10vmax; background: radial-gradient(circle, rgba(120,90,190,.22), transparent 70%); animation-delay: -8s; }
+.veil i:nth-child(3) { width: 30vmax; height: 30vmax; top: 40%; left: 60%; background: radial-gradient(circle, rgba(217,173,92,.16), transparent 70%); animation-delay: -16s; }
+html[data-theme="light"] .veil i { opacity: .55; }
+@keyframes drift { to { transform: translate(4%, 6%) scale(1.08); } }
+@media (prefers-reduced-motion: reduce) { .veil i { animation: none; } }
+
+/* ---------- theme toggle ---------- */
+.theme-switch {
+  position: fixed; top: max(1rem, env(safe-area-inset-top, 0px) + .6rem); right: 1rem; z-index: 40;
+  width: 4.5rem; height: 2.35rem;
+  border-radius: 999px; border: 1px solid var(--glass-border-soft);
+  background: var(--glass-strong); backdrop-filter: blur(16px);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.08), var(--shadow);
+  cursor: pointer; padding: .2rem; display: flex; align-items: center;
+}
+.theme-switch .thumb {
+  width: 1.95rem; height: 1.95rem; border-radius: 50%;
+  background: linear-gradient(155deg, var(--gold-bright), var(--gold));
+  display: grid; place-items: center; color: #1a1305;
+  transform: translateX(0); transition: transform .35s cubic-bezier(.2,.8,.2,1);
+  box-shadow: 0 4px 14px -4px rgba(217,173,92,.7);
+}
+html[data-theme="light"] .theme-switch .thumb { transform: translateX(2.1rem); }
+.theme-switch svg { width: 1.05rem; height: 1.05rem; }
+
+/* ---------- glass card shell (login / otp) ---------- */
+.stage {
+  min-height: 100dvh; display: grid; place-items: center;
+  padding: 2.5rem 1.25rem;
+}
+.card {
+  width: min(420px, 100%);
+  background: var(--glass); backdrop-filter: blur(22px) saturate(140%);
+  border: 1px solid var(--glass-border);
+  border-radius: 26px; padding: 2.4rem 2rem 2.1rem;
+  box-shadow: var(--shadow);
+  animation: rise-in .6s cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes rise-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.card-mark {
+  display: inline-flex; align-items: center; gap: .5rem;
+  font-family: var(--f-display); font-weight: 800; font-size: 1.05rem;
+  color: var(--muted); letter-spacing: -.01em; margin-bottom: 1.6rem;
+}
+.card-mark b { color: var(--gold-bright); font-weight: 800; }
+.card h1 {
+  margin: 0 0 .4rem; font-family: var(--f-display); font-weight: 800;
+  font-size: 1.7rem; letter-spacing: -.02em;
+}
+.card p.lede { margin: 0 0 1.8rem; color: var(--muted); font-size: .95rem; line-height: 1.5; }
+.field { margin-bottom: 1.1rem; }
+.field label { display: block; font-size: .8rem; font-weight: 600; color: var(--muted); margin-bottom: .45rem; }
+.field .box {
+  display: flex; align-items: center; gap: .6rem;
+  border: 1px solid var(--glass-border-soft); border-radius: 13px;
+  background: rgba(0,0,0,.15); padding: .8rem .95rem;
+}
+html[data-theme="light"] .field .box { background: rgba(255,255,255,.4); }
+.field .box:focus-within { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(217,173,92,.18); }
+.field .box svg { flex: none; width: 1.05rem; height: 1.05rem; color: var(--muted-2); }
+.field input {
+  flex: 1; min-width: 0; border: 0; outline: none; background: transparent; color: var(--ink);
+  font-size: .98rem; font-weight: 500;
+}
+.field input::placeholder { color: var(--muted-2); }
+.field button.eye { flex: none; border: 0; background: none; cursor: pointer; color: var(--muted-2); display: grid; place-items: center; }
+.field button.eye svg { width: 1.05rem; height: 1.05rem; }
+
+.btn-gold {
+  width: 100%; border: 0; border-radius: 13px; padding: .9rem 1rem;
+  background: linear-gradient(155deg, var(--gold-bright), var(--gold-dim));
+  color: #1a1305; font-weight: 700; font-size: .98rem; cursor: pointer;
+  box-shadow: 0 14px 30px -14px rgba(217,173,92,.65);
+  display: flex; align-items: center; justify-content: center; gap: .5rem;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.btn-gold:hover { transform: translateY(-1px); box-shadow: 0 18px 34px -14px rgba(217,173,92,.8); }
+.btn-gold:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-gold .spin { width: 1rem; height: 1rem; border-radius: 50%; border: 2px solid rgba(26,19,5,.3); border-top-color: #1a1305; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.card-foot { margin-top: 1.4rem; text-align: center; font-size: .88rem; color: var(--muted); }
+.card-foot button.link { border: 0; background: none; color: var(--gold-bright); font-weight: 600; cursor: pointer; padding: 0; }
+.form-err {
+  display: flex; gap: .55rem; align-items: flex-start;
+  background: rgba(226,121,90,.1); border: 1px solid rgba(226,121,90,.3);
+  color: var(--danger); border-radius: 11px; padding: .7rem .85rem;
+  font-size: .87rem; font-weight: 600; margin-bottom: 1.1rem; line-height: 1.4;
+}
+.form-err svg { flex: none; width: 1.1rem; height: 1.1rem; margin-top: .05rem; }
+.dev-hint {
+  font-size: .8rem; color: var(--muted-2); background: rgba(217,173,92,.08);
+  border: 1px dashed var(--glass-border); border-radius: 10px; padding: .55rem .75rem;
+  margin-bottom: 1.1rem; font-family: var(--f-code);
+}
+
+/* ---------- OTP screen ---------- */
+.otp-icon {
+  width: 3.1rem; height: 3.1rem; border-radius: 50%; margin: 0 auto 1.1rem;
+  display: grid; place-items: center;
+  background: linear-gradient(155deg, rgba(217,173,92,.28), rgba(217,173,92,.06));
+  border: 1px solid var(--glass-border); color: var(--gold-bright);
+}
+.otp-icon svg { width: 1.4rem; height: 1.4rem; }
+.card.otp-card { text-align: center; }
+.card.otp-card p.lede b { color: var(--ink); font-weight: 700; }
+.otp-row { display: flex; gap: .55rem; justify-content: center; margin: .3rem 0 1.5rem; }
+.otp-row input {
+  width: 2.6rem; height: 3.1rem; text-align: center; font-size: 1.35rem; font-weight: 700;
+  border-radius: 12px; border: 1px solid var(--glass-border-soft); background: rgba(0,0,0,.15);
+  color: var(--ink); outline: none;
+}
+html[data-theme="light"] .otp-row input { background: rgba(255,255,255,.4); }
+.otp-row input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(217,173,92,.18); }
+.resend { margin-top: 1.1rem; font-size: .85rem; color: var(--muted); }
+.resend button { border: 0; background: none; color: var(--gold-bright); font-weight: 700; cursor: pointer; padding: 0; }
+.resend button:disabled { color: var(--muted-2); cursor: default; }
+.back-link { display: inline-flex; align-items: center; gap: .35rem; border: 0; background: none; color: var(--muted); font-weight: 600; font-size: .85rem; cursor: pointer; margin-bottom: 1.3rem; padding: 0; }
+.back-link svg { width: 1rem; height: 1rem; }
+
+/* ---------- chat screen top bar ---------- */
+.top {
+  position: sticky; top: 0; z-index: 5;
+  padding: max(.85rem, env(safe-area-inset-top, 0px)) 0 .85rem;
+}
+.top-in {
+  width: min(1000px, 100% - 1.5rem); margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+  background: var(--glass-strong); backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid var(--glass-border-soft); border-radius: 18px;
+  padding: .55rem .6rem .55rem 1rem; box-shadow: var(--shadow);
+}
+.brand { display: flex; align-items: center; gap: .55rem; font-family: var(--f-display); font-weight: 800; font-size: 1.12rem; letter-spacing: -.02em; }
+.brand .mark { background: linear-gradient(155deg, var(--gold-bright), var(--gold-dim)); color: #1a1305; padding: .18rem .5rem; border-radius: 7px; font-size: .82rem; }
+.top-actions { display: flex; align-items: center; gap: .4rem; }
+.agent-wrap { position: relative; }
+.agent-btn {
+  display: flex; align-items: center; gap: .45rem; border: 1px solid var(--glass-border-soft);
+  background: rgba(0,0,0,.15); border-radius: 11px; padding: .5rem .75rem; cursor: pointer;
+  font-size: .85rem; font-weight: 600; color: var(--ink);
+}
+html[data-theme="light"] .agent-btn { background: rgba(255,255,255,.5); }
+.agent-btn .dot { width: .5rem; height: .5rem; border-radius: 50%; background: var(--gold-bright); }
+.agent-btn svg { width: .85rem; height: .85rem; color: var(--muted); }
+.agent-menu {
+  position: absolute; top: calc(100% + .5rem); right: 0; z-index: 20;
+  width: 13.5rem; background: var(--glass-strong); backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border-soft); border-radius: 14px; padding: .4rem;
+  box-shadow: var(--shadow);
+}
+.agent-menu button {
+  width: 100%; text-align: left; border: 0; background: none; border-radius: 9px;
+  padding: .55rem .65rem; font-size: .87rem; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; color: var(--ink);
+}
+.agent-menu button:hover { background: rgba(217,173,92,.14); }
+.agent-menu button[aria-selected="true"] { color: var(--gold-bright); }
+.agent-menu .sub { display: block; font-size: .72rem; font-weight: 500; color: var(--muted); margin-top: .1rem; }
+.icon-btn {
+  width: 2.35rem; height: 2.35rem; display: grid; place-items: center; border-radius: 11px;
+  border: 1px solid var(--glass-border-soft); background: rgba(0,0,0,.15); color: var(--ink); cursor: pointer;
+}
+html[data-theme="light"] .icon-btn { background: rgba(255,255,255,.5); }
+.icon-btn svg { width: 1.05rem; height: 1.05rem; }
+.icon-btn:hover { border-color: var(--glass-border); }
+
+main { flex: 1; }
+
+/* ---------- empty state ---------- */
+.hero { width: min(900px, 100% - 1.5rem); margin: 0 auto; padding: clamp(2.5rem, 12vh, 6rem) 0 2rem; }
+.hero h1 {
+  margin: 0; font-family: var(--f-display); font-weight: 800; font-stretch: 85%;
+  font-size: clamp(2.6rem, 8vw, 5rem); line-height: .98; letter-spacing: -.03em;
+}
+.hero .line { display: block; overflow: hidden; padding-bottom: .08em; }
+.hero .line span { display: inline-block; transform: translateY(105%); animation: rise .8s cubic-bezier(.2,.8,.2,1) forwards; background: linear-gradient(155deg, var(--ink), var(--gold-bright) 130%); -webkit-background-clip: text; background-clip: text; }
+.hero .line:nth-child(2) span { animation-delay: .1s; }
+@keyframes rise { to { transform: translateY(0); } }
+.sub { max-width: 32rem; margin: 1.1rem 0 0; font: 500 1.05rem/1.55 var(--f-body); color: var(--muted); }
+.starters { margin-top: clamp(1.75rem, 5vh, 3rem); display: grid; gap: .65rem; grid-template-columns: 1fr 1fr; }
+.starters button {
+  text-align: left; padding: 1rem 1.1rem; border-radius: 15px;
+  border: 1px solid var(--glass-border-soft); background: var(--glass);
+  backdrop-filter: blur(10px);
+  font-weight: 600; font-size: .92rem; line-height: 1.4; cursor: pointer; color: var(--ink);
+}
+.starters button:hover { border-color: var(--glass-border); background: rgba(217,173,92,.08); }
+@media (max-width: 620px) { .starters { grid-template-columns: 1fr; } }
+
+/* ---------- thread ---------- */
+.thread { width: min(760px, 100% - 1.5rem); margin: 0 auto; padding: 1.5rem 0 2rem; display: flex; flex-direction: column; gap: 1.9rem; }
+.u {
+  align-self: flex-end; max-width: 85%;
+  background: linear-gradient(155deg, rgba(217,173,92,.24), rgba(217,173,92,.1));
+  border: 1px solid var(--glass-border); color: var(--ink);
+  padding: .75rem 1.05rem; border-radius: 18px 18px 4px 18px;
+  font-weight: 500; font-size: 1rem; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.a-wrap {
+  align-self: flex-start; max-width: 92%; width: 100%;
+  background: var(--glass); border: 1px solid var(--glass-border-soft); backdrop-filter: blur(14px);
+  border-radius: 4px 18px 18px 18px; padding: 1.1rem 1.25rem;
+}
+.a { scroll-margin-top: 6rem; font: 400 1.02rem/1.65 var(--f-body); overflow-wrap: anywhere; }
+.a p { margin: 0 0 1em; }
+.a h4 { margin: 1.4em 0 .5em; font: 700 1rem/1.3 var(--f-display); }
+.a ul, .a ol { margin: 0 0 1em; padding-left: 1.3em; }
+.a li { margin-bottom: .3em; }
+.a :not(pre) > code { font: 500 .85em var(--f-code); background: rgba(217,173,92,.14); padding: .12em .38em; border-radius: 5px; }
+.code { margin: 0 0 1.2em; background: var(--code-bg); color: #f1ece0; border: 1px solid var(--glass-border-soft); border-radius: 13px; overflow: hidden; }
+.code-bar { display: flex; align-items: center; justify-content: space-between; padding: .4rem .5rem .4rem .85rem; border-bottom: 1px solid rgba(255,255,255,.08); font: 500 .78rem var(--f-code); color: var(--muted); }
+.code-bar button { background: none; border: 1px solid rgba(255,255,255,.18); color: inherit; border-radius: 6px; padding: .2rem .6rem; font: 600 .78rem var(--f-body); cursor: pointer; }
+.code-bar button:hover { background: var(--gold-bright); color: #1a1305; border-color: transparent; }
+.code pre { margin: 0; padding: 1rem; overflow-x: auto; font: 400 .85rem/1.65 var(--f-code); }
+.code code { font: inherit; background: none; padding: 0; }
+.meta { margin-top: .7rem; display: flex; align-items: center; gap: 1rem; font: 600 .78rem var(--f-body); color: var(--muted); }
+.meta button { background: none; border: 0; padding: 0; cursor: pointer; color: var(--gold-bright); font-weight: 700; }
+
+.wait { display: flex; gap: .35rem; padding: .5rem .3rem; align-self: flex-start; }
+.wait i { width: .5rem; height: .5rem; border-radius: 50%; background: var(--gold-bright); animation: blink 1s infinite steps(1); }
+.wait i:nth-child(2) { animation-delay: .2s; }
+.wait i:nth-child(3) { animation-delay: .4s; }
+@keyframes blink { 0%, 100% { opacity: .2; } 40% { opacity: 1; } }
+
+.err { align-self: stretch; border: 1px solid rgba(226,121,90,.35); background: rgba(226,121,90,.08); border-radius: 14px; padding: .9rem 1.1rem; font-weight: 600; line-height: 1.5; color: var(--danger); }
+.err p { margin: 0 0 .65rem; }
+.err .btn { border: 1px solid var(--danger); background: none; color: var(--danger); border-radius: 9px; padding: .4rem .85rem; font-weight: 700; cursor: pointer; font-size: .85rem; }
+
+/* ---------- composer ---------- */
+.dock { position: sticky; bottom: 0; padding: .6rem 0 max(.6rem, env(safe-area-inset-bottom, 0px)); }
+.dock-in { width: min(760px, 100% - 1.5rem); margin: 0 auto; }
+.box2 {
+  display: flex; align-items: flex-end; gap: .5rem;
+  background: var(--glass-strong); backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid var(--glass-border-soft); border-radius: 20px; padding: .55rem .55rem .55rem 1.1rem;
+  box-shadow: var(--shadow);
+}
+.box2:focus-within { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(217,173,92,.16), var(--shadow); }
+.box2 textarea { flex: 1; min-width: 0; border: 0; outline: none; resize: none; background: transparent; color: var(--ink); font: 500 1.02rem/1.5 var(--f-body); padding: .55rem 0; max-height: 12rem; }
+.box2 textarea::placeholder { color: var(--muted-2); }
+.send2 { flex: none; width: 2.7rem; height: 2.7rem; display: grid; place-items: center; border: 0; border-radius: 13px; background: linear-gradient(155deg, var(--gold-bright), var(--gold-dim)); color: #1a1305; cursor: pointer; }
+.send2:disabled { opacity: .35; cursor: not-allowed; }
+.note { margin: .55rem .3rem 0; font: 500 .76rem var(--f-body); color: var(--muted-2); }
+
+@media (max-width: 520px) {
+  .u { max-width: 92%; }
+  .top-in .brand span.txt { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero .line span { animation: none; transform: none; }
+  .wait i { animation: none; opacity: .7; }
+  .card { animation: none; }
+}
+</style>
+</head>
+<body class="dark">
+
+<div class="veil" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<button class="theme-switch" id="themeSwitch" type="button" role="switch" aria-checked="false" aria-label="Ganti mode terang/gelap">
+  <span class="thumb">
+    <svg id="themeIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.3" stroke="currentColor" stroke-width="2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </span>
+</button>
+
+<!-- ================= LOGIN ================= -->
+<section class="stage" id="screen-login">
+  <form class="card" id="loginForm" novalidate>
+    <div class="card-mark">BlackMamer <b>AI</b></div>
+    <h1>Selamat datang</h1>
+    <p class="lede">Masuk dulu buat lanjut ngobrol sama AI-nya.</p>
+    <div id="loginErr"></div>
+    <div class="field">
+      <label for="loginEmail">Alamat email</label>
+      <div class="box">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 6.5h18v11a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-11Z" stroke="currentColor" stroke-width="1.7"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <input id="loginEmail" type="email" inputmode="email" autocomplete="email" placeholder="nama@email.com" required>
+      </div>
+    </div>
+    <div class="field">
+      <label for="loginPassword">Password</label>
+      <div class="box">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="9.5" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="currentColor" stroke-width="1.7"/></svg>
+        <input id="loginPassword" type="password" autocomplete="current-password" placeholder="••••••••" required>
+        <button class="eye" type="button" id="toggleEye" aria-label="Tampilkan password">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="2.6" stroke="currentColor" stroke-width="1.7"/></svg>
+        </button>
+      </div>
+    </div>
+    <button class="btn-gold" id="loginSubmit" type="submit">
+      <span>Kirim kode OTP</span>
+    </button>
+    <p class="card-foot">Belum ada akses? Hubungi admin BlackMamer Studio buat dapat password.</p>
+  </form>
+</section>
+
+<!-- ================= OTP ================= -->
+<section class="stage" id="screen-otp" hidden>
+  <div class="card otp-card">
+    <button class="back-link" id="otpBack" type="button">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Ganti email
+    </button>
+    <div class="otp-icon">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2.2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="currentColor" stroke-width="1.8"/></svg>
+    </div>
+    <h1>Verifikasi email</h1>
+    <p class="lede">Kode 6 digit dikirim ke <b id="otpEmailShown">-</b></p>
+    <div id="otpErr"></div>
+    <div id="devHint"></div>
+    <div class="otp-row" id="otpRow">
+      <input inputmode="numeric" maxlength="1" autocomplete="one-time-code">
+      <input inputmode="numeric" maxlength="1">
+      <input inputmode="numeric" maxlength="1">
+      <input inputmode="numeric" maxlength="1">
+      <input inputmode="numeric" maxlength="1">
+      <input inputmode="numeric" maxlength="1">
+    </div>
+    <button class="btn-gold" id="otpSubmit" type="button"><span>Verifikasi</span></button>
+    <p class="resend">Nggak dapat kode? <button type="button" id="resendBtn">Kirim ulang</button><span id="resendTimer"></span></p>
+  </div>
+</section>
+
+<!-- ================= CHAT ================= -->
+<div id="screen-chat" hidden style="display:flex;flex-direction:column;min-height:100dvh;">
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><span class="mark">AI</span><span class="txt">BlackMamer</span></div>
+    <div class="top-actions">
+      <div class="agent-wrap">
+        <button class="agent-btn" id="agentBtn" type="button" aria-haspopup="true" aria-expanded="false">
+          <span class="dot"></span><span id="agentLabel">Auto</span>
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="agent-menu" id="agentMenu" role="menu" hidden></div>
+      </div>
+      <button class="icon-btn" id="reset" type="button" title="Chat baru" hidden>
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12a8 8 0 1 1 2.6 5.9M4 12V6m0 6h6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="icon-btn" id="logoutBtn" type="button" title="Keluar">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 17l5-5-5-5M20 12H9M12 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero" id="hero">
+    <h1 aria-label="Tanya apa aja.">
+      <span class="line"><span>Tanya</span></span>
+      <span class="line"><span>apa aja.</span></span>
+    </h1>
+    <p class="sub">Kalau satu model lagi penuh, jawabannya otomatis diambil dari model lain — atau pilih sendiri agent-nya di pojok kanan atas.</p>
+    <div class="starters" id="starters">
+      <button type="button">Bikinin script Luau buat leaderboard donasi</button>
+      <button type="button">Jelasin beda RemoteEvent dan RemoteFunction</button>
+      <button type="button">Kenapa layout CSS gua pecah di HP?</button>
+      <button type="button">Tulis caption promo buat asset Roblox baru</button>
+    </div>
+  </section>
+
+  <section class="thread" id="thread" aria-live="polite" hidden></section>
+</main>
+
+<footer class="dock">
+  <div class="dock-in">
+    <div class="box2">
+      <textarea id="input" rows="1" placeholder="Tulis pertanyaan…" aria-label="Pesan" enterkeyhint="send"></textarea>
+      <button class="send2" id="send" type="button" aria-label="Kirim" disabled>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 16V4M4.5 9.5 10 4l5.5 5.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"/></svg>
+      </button>
+    </div>
+    <p class="note">Model gratis punya batas harian. Jangan kirim data rahasia.</p>
+  </div>
+</footer>
+</div>
+
+<script>
+(() => {
+  const STORE = "bm-ai-chat-v1";
+  const THEME_STORE = "bm-ai-theme";
+  const AGENT_STORE = "bm-ai-agent";
+  const NAMES = { groq: "Groq", gemini: "Gemini", mistral: "Mistral", nvidia: "NVIDIA", openrouter: "OpenRouter" };
+  const AGENTS = [
+    { id: "auto", label: "Auto", sub: "Pindah otomatis kalau penuh" },
+    { id: "groq", label: "Groq", sub: "gpt-oss-120b" },
+    { id: "gemini", label: "Gemini", sub: "2.5 Flash" },
+    { id: "mistral", label: "Mistral", sub: "Small" },
+    { id: "nvidia", label: "NVIDIA", sub: "gpt-oss-120b" },
+    { id: "openrouter", label: "OpenRouter", sub: "gpt-oss-20b free" },
+  ];
+
+  const $ = (s, r) => (r || document).querySelector(s);
+  const html = document.documentElement;
+
+  /* ================= THEME ================= */
+  const themeSwitch = $("#themeSwitch");
+  function applyTheme(mode) {
+    html.setAttribute("data-theme", mode);
+    themeSwitch.setAttribute("aria-checked", String(mode === "light"));
+  }
+  let savedTheme = null;
+  try { savedTheme = localStorage.getItem(THEME_STORE); } catch (_) {}
+  applyTheme(savedTheme === "light" ? "light" : "dark");
+  themeSwitch.addEventListener("click", () => {
+    const next = html.getAttribute("data-theme") === "light" ? "dark" : "light";
+    applyTheme(next);
+    try { localStorage.setItem(THEME_STORE, next); } catch (_) {}
+  });
+
+  /* ================= SCREENS ================= */
+  const screens = { login: $("#screen-login"), otp: $("#screen-otp"), chat: $("#screen-chat") };
+  function showScreen(name) {
+    Object.entries(screens).forEach(([k, el]) => (el.hidden = k !== name));
+  }
+
+  /* ================= LOGIN ================= */
+  const loginForm = $("#loginForm"), loginEmail = $("#loginEmail"), loginPassword = $("#loginPassword");
+  const loginSubmit = $("#loginSubmit"), loginErr = $("#loginErr");
+  let pendingEmail = "", pendingPassword = "";
+
+  function setErr(el, msg) {
+    el.innerHTML = msg
+      ? `<div class="form-err"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>${msg}</span></div>`
+      : "";
+  }
+  function busyBtn(btn, isBusy, label) {
+    btn.disabled = isBusy;
+    btn.innerHTML = isBusy ? `<span class="spin"></span><span>Memproses…</span>` : `<span>${label}</span>`;
+  }
+
+  $("#toggleEye").addEventListener("click", () => {
+    loginPassword.type = loginPassword.type === "password" ? "text" : "password";
+  });
+
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    setErr(loginErr, "");
+    const email = loginEmail.value.trim();
+    const password = loginPassword.value;
+    if (!email || !password) return setErr(loginErr, "Isi email dan password dulu.");
+    busyBtn(loginSubmit, true);
+    try {
+      const r = await fetch("/api/auth/login", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || "Gagal login.");
+      pendingEmail = email; pendingPassword = password;
+      startOtpScreen(data);
+    } catch (err) {
+      setErr(loginErr, err.message || "Gagal login.");
+    }
+    busyBtn(loginSubmit, false, "Kirim kode OTP");
+  });
+
+  /* ================= OTP ================= */
+  const otpEmailShown = $("#otpEmailShown"), otpRow = $("#otpRow"), otpInputs = [...otpRow.querySelectorAll("input")];
+  const otpErr = $("#otpErr"), devHint = $("#devHint"), otpSubmit = $("#otpSubmit");
+  const resendBtn = $("#resendBtn"), resendTimer = $("#resendTimer"), otpBack = $("#otpBack");
+  let resendCooldownId = null;
+
+  function startOtpScreen(loginData) {
+    otpEmailShown.textContent = pendingEmail;
+    setErr(otpErr, "");
+    devHint.innerHTML = loginData && loginData.devOtp
+      ? `<div class="dev-hint">Mode dev (belum ada RESEND_API_KEY) — kode kamu: <b>${loginData.devOtp}</b></div>`
+      : "";
+    otpInputs.forEach((i) => (i.value = ""));
+    showScreen("otp");
+    otpInputs[0].focus();
+    runResendCooldown(30);
+  }
+
+  function runResendCooldown(seconds) {
+    clearInterval(resendCooldownId);
+    let left = seconds;
+    resendBtn.disabled = true;
+    const tick = () => {
+      resendTimer.textContent = left > 0 ? ` (${left}s)` : "";
+      if (left <= 0) { clearInterval(resendCooldownId); resendBtn.disabled = false; }
+      left -= 1;
+    };
+    tick();
+    resendCooldownId = setInterval(tick, 1000);
+  }
+
+  otpInputs.forEach((inp, idx) => {
+    inp.addEventListener("input", () => {
+      inp.value = inp.value.replace(/\D/g, "").slice(-1);
+      if (inp.value && otpInputs[idx + 1]) otpInputs[idx + 1].focus();
+    });
+    inp.addEventListener("keydown", (e) => {
+      if (e.key === "Backspace" && !inp.value && otpInputs[idx - 1]) otpInputs[idx - 1].focus();
+      if (e.key === "Enter") verifyOtp();
+    });
+    inp.addEventListener("paste", (e) => {
+      const text = (e.clipboardData || window.clipboardData).getData("text").replace(/\D/g, "");
+      if (!text) return;
+      e.preventDefault();
+      text.split("").slice(0, otpInputs.length).forEach((ch, i) => { if (otpInputs[i]) otpInputs[i].value = ch; });
+      const nextEmpty = otpInputs.findIndex((i) => !i.value);
+      (nextEmpty === -1 ? otpInputs[otpInputs.length - 1] : otpInputs[nextEmpty]).focus();
+    });
+  });
+
+  async function verifyOtp() {
+    const code = otpInputs.map((i) => i.value).join("");
+    if (code.length !== 6) return setErr(otpErr, "Isi semua 6 digit kodenya.");
+    setErr(otpErr, "");
+    busyBtn(otpSubmit, true);
+    try {
+      const r = await fetch("/api/auth/verify", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: pendingEmail, code }),
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || "Verifikasi gagal.");
+      pendingPassword = "";
+      enterChat();
+    } catch (err) {
+      setErr(otpErr, err.message || "Verifikasi gagal.");
+      otpInputs.forEach((i) => (i.value = ""));
+      otpInputs[0].focus();
+    }
+    busyBtn(otpSubmit, false, "Verifikasi");
+  }
+  otpSubmit.addEventListener("click", verifyOtp);
+
+  resendBtn.addEventListener("click", async () => {
+    if (resendBtn.disabled || !pendingEmail || !pendingPassword) return;
+    setErr(otpErr, "");
+    try {
+      const r = await fetch("/api/auth/login", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: pendingEmail, password: pendingPassword }),
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || "Gagal kirim ulang.");
+      devHint.innerHTML = data.devOtp ? `<div class="dev-hint">Mode dev — kode kamu: <b>${data.devOtp}</b></div>` : "";
+      runResendCooldown(30);
+    } catch (err) {
+      setErr(otpErr, err.message || "Gagal kirim ulang.");
+    }
+  });
+
+  otpBack.addEventListener("click", () => {
+    clearInterval(resendCooldownId);
+    showScreen("login");
+    loginPassword.focus();
+  });
+
+  /* ================= AGENT SELECTOR ================= */
+  const agentBtn = $("#agentBtn"), agentMenu = $("#agentMenu"), agentLabel = $("#agentLabel");
+  let currentAgent = "auto";
+  try { currentAgent = localStorage.getItem(AGENT_STORE) || "auto"; } catch (_) {}
+
+  function renderAgentMenu() {
+    agentMenu.innerHTML = AGENTS.map((a) => `
+      <button type="button" role="menuitemradio" aria-selected="${a.id === currentAgent}" data-agent="${a.id}">
+        <span>${a.label}<span class="sub">${a.sub}</span></span>
+        ${a.id === currentAgent ? "✓" : ""}
+      </button>`).join("");
+    agentLabel.textContent = (AGENTS.find((a) => a.id === currentAgent) || AGENTS[0]).label;
+  }
+  renderAgentMenu();
+
+  function closeAgentMenu() { agentMenu.hidden = true; agentBtn.setAttribute("aria-expanded", "false"); }
+  agentBtn.addEventListener("click", () => {
+    const willOpen = agentMenu.hidden;
+    agentMenu.hidden = !willOpen;
+    agentBtn.setAttribute("aria-expanded", String(willOpen));
+  });
+  agentMenu.addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-agent]");
+    if (!b) return;
+    currentAgent = b.dataset.agent;
+    try { localStorage.setItem(AGENT_STORE, currentAgent); } catch (_) {}
+    renderAgentMenu();
+    closeAgentMenu();
+  });
+  document.addEventListener("click", (e) => {
+    if (!agentBtn.contains(e.target) && !agentMenu.contains(e.target)) closeAgentMenu();
+  });
+
+  /* ================= CHAT ================= */
+  const hero = $("#hero"), thread = $("#thread"), input = $("#input");
+  const sendBtn = $("#send"), resetBtn = $("#reset"), logoutBtn = $("#logoutBtn");
+
+  let messages = [];
+  let busy = false;
+  let error = null;
+
+  function loadMessages() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORE) || "[]");
+      if (Array.isArray(saved)) messages = saved.filter((m) => m && typeof m.content === "string");
+    } catch (_) {}
+  }
+  const persist = () => {
+    try { localStorage.setItem(STORE, JSON.stringify(messages.slice(-40))); } catch (_) {}
+  };
+
+  const esc = (s) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  function codeBlock(b) {
+    const lang = esc((b.lang || "kode").toLowerCase());
+    return `<div class="code"><div class="code-bar"><span>${lang}</span><button type="button" data-copy-code>Salin</button></div><pre><code>${esc(b.code)}</code></pre></div>`;
+  }
+
+  function md(src) {
+    const blocks = [];
+    src = src.replace(/```([\w+-]*)[^\n]*\n?([\s\S]*?)```/g, (_, lang, code) => {
+      blocks.push({ lang, code: code.replace(/\n$/, "") });
+      return `\u0000${blocks.length - 1}\u0000`;
+    });
+
+    let out2 = esc(src)
+      .replace(/`([^`\n]+)`/g, "<code>$1</code>")
+      .replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>")
+      .replace(/(^|[^*\w])\*([^*\s][^*\n]*)\*/g, "$1<em>$2</em>");
+
+    let out = "", para = [], list = null;
+    const flushPara = () => { if (para.length) { out += "<p>" + para.join("<br>") + "</p>"; para = []; } };
+    const flushList = () => {
+      if (list) { out += `<${list.t}>` + list.items.map((i) => `<li>${i}</li>`).join("") + `</${list.t}>`; list = null; }
+    };
+
+    for (const raw of out2.split("\n")) {
+      const line = raw.trimEnd();
+      let m;
+      if (/^\u0000\d+\u0000$/.test(line.trim())) { flushPara(); flushList(); out += line.trim(); continue; }
+      if ((m = line.match(/^#{1,4}\s+(.*)$/))) { flushPara(); flushList(); out += `<h4>${m[1]}</h4>`; continue; }
+      if ((m = line.match(/^\s*[-*]\s+(.*)$/))) {
+        flushPara();
+        if (!list || list.t !== "ul") { flushList(); list = { t: "ul", items: [] }; }
+        list.items.push(m[1]); continue;
+      }
+      if ((m = line.match(/^\s*\d+[.)]\s+(.*)$/))) {
+        flushPara();
+        if (!list || list.t !== "ol") { flushList(); list = { t: "ol", items: [] }; }
+        list.items.push(m[1]); continue;
+      }
+      if (!line.trim()) { flushPara(); flushList(); continue; }
+      flushList(); para.push(line);
+    }
+    flushPara(); flushList();
+    return out.replace(/\u0000(\d+)\u0000/g, (_, i) => codeBlock(blocks[+i]));
+  }
+
+  function render() {
+    const empty = messages.length === 0 && !busy && !error;
+    hero.hidden = !empty;
+    thread.hidden = empty;
+    resetBtn.hidden = messages.length === 0;
+
+    let out = "";
+    messages.forEach((m, i) => {
+      if (m.role === "user") {
+        out += `<div class="u">${esc(m.content)}</div>`;
+      } else {
+        const who = NAMES[m.provider] || "";
+        out += `<div class="a-wrap"><article class="a" data-i="${i}">${md(m.content)}<div class="meta">${who ? `<span>Dijawab ${who}</span>` : ""}<button type="button" data-copy-answer="${i}">Salin jawaban</button></div></article></div>`;
+      }
+    });
+    if (busy) out += `<div class="wait" role="status"><i></i><i></i><i></i><span style="position:absolute;left:-9999px">Menunggu jawaban</span></div>`;
+    if (error) out += `<div class="err"><p>${esc(error)}</p><button class="btn" type="button" data-retry>Kirim ulang</button></div>`;
+    thread.innerHTML = out;
+    sendBtn.disabled = busy || !input.value.trim();
+  }
+
+  function scrollToLatest() {
+    const last = messages[messages.length - 1];
+    const answers = thread.querySelectorAll(".a-wrap");
+    if (!busy && !error && last && last.role === "assistant" && answers.length) {
+      answers[answers.length - 1].scrollIntoView({ block: "start", behavior: "smooth" });
+    } else {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+    }
+  }
+
+  async function request() {
+    busy = true; error = null; render(); scrollToLatest();
+    try {
+      const r = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: messages.slice(-20).map(({ role, content }) => ({ role, content })),
+          agent: currentAgent,
+        }),
+      });
+      if (r.status === 401) { showScreen("login"); throw new Error("Sesi habis, login lagi ya."); }
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || `Server membalas dengan kode ${r.status}.`);
+      messages.push({ role: "assistant", content: data.reply, provider: data.provider });
+    } catch (e) {
+      error = e instanceof TypeError ? "Koneksi terputus. Cek internet lalu kirim ulang." : e.message;
+    }
+    busy = false; persist(); render(); scrollToLatest();
+    if (!error) input.focus({ preventScroll: true });
+  }
+
+  function send(text) {
+    text = (text || "").trim();
+    if (!text || busy) return;
+    messages.push({ role: "user", content: text });
+    persist();
+    input.value = ""; fit();
+    request();
+  }
+
+  function fit() {
+    input.style.height = "auto";
+    input.style.height = Math.min(input.scrollHeight, 192) + "px";
+    sendBtn.disabled = busy || !input.value.trim();
+  }
+  input.addEventListener("input", fit);
+  input.addEventListener("keydown", (e) => {
+    const desktop = matchMedia("(pointer: fine)").matches;
+    if (e.key === "Enter" && !e.shiftKey && !e.isComposing && desktop) {
+      e.preventDefault();
+      send(input.value);
+    }
+  });
+  sendBtn.addEventListener("click", () => send(input.value));
+
+  $("#starters").addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (b) send(b.textContent);
+  });
+
+  resetBtn.addEventListener("click", () => {
+    if (busy) return;
+    messages = []; error = null; persist(); render(); input.focus();
+    window.scrollTo({ top: 0 });
+  });
+
+  const flash = (btn, label) => {
+    const old = btn.textContent;
+    btn.textContent = label;
+    setTimeout(() => (btn.textContent = old), 1400);
+  };
+  const copy = async (text, btn) => {
+    try { await navigator.clipboard.writeText(text); flash(btn, "Tersalin"); }
+    catch (_) { flash(btn, "Gagal menyalin"); }
+  };
+
+  thread.addEventListener("click", (e) => {
+    const t = e.target;
+    if (t.matches("[data-retry]")) { request(); return; }
+    if (t.matches("[data-copy-code]")) {
+      copy(t.closest(".code").querySelector("code").textContent, t);
+    } else if (t.matches("[data-copy-answer]")) {
+      const m = messages[+t.dataset.copyAnswer];
+      if (m) copy(m.content, t);
+    }
+  });
+
+  logoutBtn.addEventListener("click", async () => {
+    try { await fetch("/api/auth/logout", { method: "POST" }); } catch (_) {}
+    messages = []; error = null; busy = false;
+    try { localStorage.removeItem(STORE); } catch (_) {}
+    showScreen("login");
+    loginForm.reset();
+    setErr(loginErr, "");
+  });
+
+  function enterChat() {
+    loadMessages();
+    showScreen("chat");
+    render();
+    fit();
+  }
+
+  /* ================= BOOT ================= */
+  (async () => {
+    try {
+      const r = await fetch("/api/auth/me");
+      if (r.ok) { enterChat(); return; }
+    } catch (_) {}
+    showScreen("login");
+  })();
+})();
+</script>
+</body>
+</html>
