@@ -256,6 +256,225 @@ html[data-theme="light"] .otp-row input { background: rgba(255,255,255,.4); }
 .back-link { display: inline-flex; align-items: center; gap: .35rem; border: 0; background: none; color: var(--muted); font-weight: 600; font-size: .85rem; cursor: pointer; margin-bottom: 1.3rem; padding: 0; }
 .back-link svg { width: 1rem; height: 1rem; }
 
+
+/* ---------- BlackMamer cinematic motion layer ---------- */
+.screen-motion-in {
+  animation: screenMotionIn .72s cubic-bezier(.16,1,.3,1) both;
+}
+.screen-motion-out {
+  animation: screenMotionOut .38s cubic-bezier(.7,0,.84,0) both;
+}
+@keyframes screenMotionIn {
+  from { opacity: 0; transform: translateY(22px) scale(.94); filter: blur(10px); }
+  to   { opacity: 1; transform: none; filter: blur(0); }
+}
+@keyframes screenMotionOut {
+  from { opacity: 1; transform: none; filter: blur(0); }
+  to   { opacity: 0; transform: translateY(-12px) scale(.985); filter: blur(7px); }
+}
+
+/* The reference video uses a soft, physical glass-card entrance. */
+.card {
+  transform-origin: 50% 55%;
+  will-change: transform, opacity, filter;
+}
+.stage.screen-motion-in .card {
+  animation:
+    cinematicCardIn .9s cubic-bezier(.16,1,.3,1) both,
+    cardSheen 1.8s .25s ease-out both;
+}
+@keyframes cinematicCardIn {
+  0%   { opacity: 0; transform: translateY(34px) scale(.88) rotateX(5deg); filter: blur(12px); }
+  58%  { opacity: 1; transform: translateY(-5px) scale(1.015) rotateX(0); filter: blur(0); }
+  78%  { transform: translateY(1px) scale(.996); }
+  100% { opacity: 1; transform: none; filter: none; }
+}
+@keyframes cardSheen {
+  0%   { --motion-sheen: -120%; }
+  100% { --motion-sheen: 120%; }
+}
+
+/* Gold light streak like the second reference video. */
+.btn-gold::before {
+  content: "";
+  position: absolute;
+  inset: -80% -30%;
+  background: linear-gradient(110deg, transparent 42%, rgba(255,255,255,.65) 50%, transparent 58%);
+  transform: translateX(-75%);
+  opacity: 0;
+  pointer-events: none;
+}
+.btn-gold:hover::before,
+.btn-gold:focus-visible::before {
+  opacity: 1;
+  animation: buttonLightSweep 1s ease-out;
+}
+@keyframes buttonLightSweep {
+  to { transform: translateX(75%); }
+}
+
+/* Input interaction: tiny lift + gold bloom, matching the filmed UI. */
+.field .box {
+  transform: translateZ(0);
+  will-change: transform, box-shadow, border-color;
+}
+.field .box:focus-within {
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 3px rgba(217,173,92,.18), 0 12px 28px -18px rgba(217,173,92,.75);
+}
+.stage.screen-motion-in .field {
+  animation: fieldRise .55s cubic-bezier(.16,1,.3,1) both;
+}
+.stage.screen-motion-in .field:nth-of-type(1) { animation-delay: .18s; }
+@keyframes fieldRise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* OTP boxes get the same physical pop as the reference. */
+.stage.screen-motion-in .otp-row input {
+  animation: otpIntro .5s cubic-bezier(.16,1,.3,1) both;
+}
+.stage.screen-motion-in .otp-row input:nth-child(1) { animation-delay: .18s; }
+.stage.screen-motion-in .otp-row input:nth-child(2) { animation-delay: .22s; }
+.stage.screen-motion-in .otp-row input:nth-child(3) { animation-delay: .26s; }
+.stage.screen-motion-in .otp-row input:nth-child(4) { animation-delay: .30s; }
+.stage.screen-motion-in .otp-row input:nth-child(5) { animation-delay: .34s; }
+.stage.screen-motion-in .otp-row input:nth-child(6) { animation-delay: .38s; }
+@keyframes otpIntro {
+  from { opacity: 0; transform: translateY(15px) scale(.82); }
+  70%  { opacity: 1; transform: translateY(-2px) scale(1.04); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---------- verification success: card -> gold orb -> check ---------- */
+.otp-success {
+  position: absolute !important;
+  inset: 0;
+  z-index: 8 !important;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(.55);
+  filter: blur(10px);
+}
+.otp-success-inner {
+  display: grid;
+  justify-items: center;
+  gap: .7rem;
+}
+.success-orb {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 35% 30%, #ffe4a7, var(--gold) 58%, #9a7334);
+  color: #171208;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.28) inset,
+    0 0 38px rgba(217,173,92,.5),
+    0 20px 45px -18px rgba(217,173,92,.9);
+}
+.success-orb::before,
+.success-orb::after {
+  content: "";
+  position: absolute;
+  inset: -16px;
+  border: 1px solid rgba(242,204,134,.35);
+  border-radius: 50%;
+  animation: successRing 1.25s ease-out infinite;
+}
+.success-orb::after {
+  inset: -31px;
+  opacity: .45;
+  animation-delay: .18s;
+}
+.success-orb svg {
+  width: 31px;
+  height: 31px;
+  stroke-dasharray: 50;
+  stroke-dashoffset: 50;
+}
+.otp-success strong {
+  font-family: var(--f-display);
+  font-size: 1.05rem;
+  color: var(--ink);
+  opacity: 0;
+  transform: translateY(7px);
+}
+.otp-success small {
+  color: var(--muted);
+  opacity: 0;
+  transform: translateY(7px);
+}
+@keyframes successRing {
+  0%   { transform: scale(.55); opacity: .8; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+.otp-card.successing {
+  min-height: 330px;
+  animation: verifyCardMorph 1.15s cubic-bezier(.16,1,.3,1) both;
+}
+.otp-card.successing > *:not(.otp-success) {
+  animation: verifyContentAway .48s .04s cubic-bezier(.7,0,.84,0) both;
+}
+.otp-card.successing .otp-success {
+  animation: successReveal .75s .45s cubic-bezier(.16,1,.3,1) both;
+}
+.otp-card.successing .success-orb svg {
+  animation: checkDraw .45s .95s ease-out forwards;
+}
+.otp-card.successing .otp-success strong,
+.otp-card.successing .otp-success small {
+  animation: successText .45s 1.05s cubic-bezier(.16,1,.3,1) forwards;
+}
+@keyframes verifyCardMorph {
+  0%   { border-radius: 26px; transform: scale(1); }
+  42%  { border-radius: 30px; transform: scale(.94); }
+  72%  { border-radius: 50%; width: 170px; height: 170px; padding: 0; transform: scale(.9); }
+  100% { border-radius: 50%; width: 170px; height: 170px; padding: 0; transform: scale(1); }
+}
+@keyframes verifyContentAway {
+  to { opacity: 0; transform: scale(.72); filter: blur(9px); }
+}
+@keyframes successReveal {
+  from { opacity: 0; transform: scale(.55); filter: blur(10px); }
+  to   { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+@keyframes checkDraw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes successText {
+  to { opacity: 1; transform: none; }
+}
+
+/* Make the chat appear as a clean continuation rather than a hard swap. */
+#screen-chat.screen-motion-in {
+  animation: chatReveal .8s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes chatReveal {
+  from { opacity: 0; transform: scale(.985); filter: blur(8px); }
+  to { opacity: 1; transform: none; filter: blur(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen-motion-in,
+  .screen-motion-out,
+  .stage.screen-motion-in .card,
+  .stage.screen-motion-in .field,
+  .stage.screen-motion-in .otp-row input,
+  .otp-card.successing,
+  .otp-card.successing > *:not(.otp-success),
+  .otp-card.successing .otp-success,
+  #screen-chat.screen-motion-in {
+    animation: none !important;
+  }
+}
+
 /* ---------- screen transition ---------- */
 .stage { animation: stage-in .45s cubic-bezier(.2,.8,.2,1) both; }
 @keyframes stage-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
@@ -466,6 +685,18 @@ main { flex: 1; }
     </div>
     <button class="btn-gold" id="otpSubmit" type="button"><span>Verifikasi</span></button>
     <p class="resend">Nggak dapat kode? <button type="button" id="resendBtn">Kirim ulang</button><span id="resendTimer"></span></p>
+
+    <div class="otp-success" id="otpSuccess" aria-hidden="true">
+      <div class="otp-success-inner">
+        <div class="success-orb">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6.5 12.5 10.2 16l7.4-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <strong>Verified</strong>
+        <small>Identity confirmed</small>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -559,9 +790,27 @@ main { flex: 1; }
   /* ================= SCREENS ================= */
   const flowBg = $("#flowBg");
   const screens = { login: $("#screen-login"), otp: $("#screen-otp"), chat: $("#screen-chat") };
+  let screenMotionTimer = null;
   function showScreen(name) {
-    Object.entries(screens).forEach(([k, el]) => (el.hidden = k !== name));
+    clearTimeout(screenMotionTimer);
+
+    Object.entries(screens).forEach(([k, el]) => {
+      const active = k === name;
+      el.hidden = !active;
+      el.classList.remove("screen-motion-in", "screen-motion-out");
+      if (active) {
+        // Force a reflow so the same animation can replay every time.
+        void el.offsetWidth;
+        el.classList.add("screen-motion-in");
+      }
+    });
+
     flowBg.classList.toggle("on", name === "login" || name === "otp");
+
+    screenMotionTimer = setTimeout(() => {
+      const active = screens[name];
+      if (active) active.classList.remove("screen-motion-in");
+    }, 950);
   }
   showScreen("login"); // set initial flow-bg state; real screen picked at boot below
 
@@ -605,6 +854,7 @@ main { flex: 1; }
   /* ================= OTP ================= */
   const otpEmailShown = $("#otpEmailShown"), otpRow = $("#otpRow"), otpInputs = [...otpRow.querySelectorAll("input")];
   const otpErr = $("#otpErr"), devHint = $("#devHint"), otpSubmit = $("#otpSubmit");
+  const otpSuccess = $("#otpSuccess");
   const resendBtn = $("#resendBtn"), resendTimer = $("#resendTimer"), otpBack = $("#otpBack");
   let resendCooldownId = null;
 
@@ -675,8 +925,22 @@ main { flex: 1; }
       });
       const data = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(data.error || "Verifikasi gagal.");
-      enterChat();
+
+      // Reference-style success sequence:
+      // button sweep -> card collapses into a gold orb -> checkmark -> chat reveal.
+      const otpCard = otpSubmit.closest(".otp-card");
+      otpSuccess.setAttribute("aria-hidden", "false");
+      otpCard.classList.add("successing");
+
+      setTimeout(() => {
+        otpCard.classList.remove("successing");
+        otpSuccess.setAttribute("aria-hidden", "true");
+        enterChat();
+      }, 1650);
     } catch (err) {
+      const otpCard = otpSubmit.closest(".otp-card");
+      otpCard.classList.remove("successing");
+      otpSuccess.setAttribute("aria-hidden", "true");
       setErr(otpErr, err.message || "Verifikasi gagal.");
       otpRow.classList.add("shake");
       setTimeout(() => otpRow.classList.remove("shake"), 420);
@@ -922,6 +1186,9 @@ main { flex: 1; }
     try { await fetch("/api/auth/logout", { method: "POST" }); } catch (_) {}
     messages = []; error = null; busy = false;
     try { localStorage.removeItem(STORE); } catch (_) {}
+    const otpCard = otpSubmit.closest(".otp-card");
+    otpCard.classList.remove("successing");
+    otpSuccess.setAttribute("aria-hidden", "true");
     showScreen("login");
     loginForm.reset();
     setErr(loginErr, "");
