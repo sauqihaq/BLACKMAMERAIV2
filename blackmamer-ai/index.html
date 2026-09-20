@@ -732,6 +732,144 @@ main { flex: 1; }
   .stage { animation: none; }
   .flow-bg::before, .flow-bg::after { animation: none; }
 }
+
+/* =========================================================
+   BLACKMAMER AI — THEME FIX v2
+   ========================================================= */
+:root {
+  --page-bg: #07070a;
+  --panel-bg: rgba(13,11,9,.92);
+  --panel-solid: #0d0b09;
+  --panel-soft: rgba(255,255,255,.045);
+  --panel-soft-2: rgba(255,255,255,.025);
+  --line: rgba(255,255,255,.09);
+  --line-soft: rgba(255,255,255,.065);
+  --workspace-text: #f5efe6;
+  --workspace-muted: #8c8477;
+  --workspace-dim: #6f685d;
+  --workspace-inverse: #171208;
+}
+html[data-theme="light"] {
+  --page-bg: #f2eee6;
+  --panel-bg: rgba(255,255,255,.92);
+  --panel-solid: #fffdf8;
+  --panel-soft: rgba(255,255,255,.72);
+  --panel-soft-2: rgba(28,23,18,.035);
+  --line: rgba(28,23,18,.10);
+  --line-soft: rgba(28,23,18,.065);
+  --workspace-text: #241e17;
+  --workspace-muted: #756b5c;
+  --workspace-dim: #958a78;
+  --workspace-inverse: #fffaf0;
+}
+
+/* Login / OTP cards were still visually dark in light mode. */
+html[data-theme="light"] .card {
+  background: linear-gradient(160deg, rgba(255,255,255,.86), rgba(255,255,255,.62));
+  border-color: rgba(28,23,18,.11);
+  box-shadow: 0 30px 80px -30px rgba(63,48,25,.24), inset 0 1px 0 rgba(255,255,255,.9), inset 0 0 40px rgba(217,173,92,.035);
+}
+html[data-theme="light"] .card::before { background: linear-gradient(115deg, transparent 20%, rgba(255,255,255,.55), transparent 80%); }
+html[data-theme="light"] .flow-bg::before,
+html[data-theme="light"] .flow-bg::after { opacity: .7; }
+
+/* Workspace base */
+#screen-chat { background:
+  radial-gradient(900px 500px at 66% 34%, rgba(217,173,92,.13), transparent 60%),
+  radial-gradient(600px 420px at 45% 10%, rgba(255,214,137,.07), transparent 65%),
+  linear-gradient(145deg, #080707 0%, #0d0a08 48%, #070707 100%);
+  color: var(--workspace-text);
+}
+html[data-theme="light"] #screen-chat {
+  background:
+    radial-gradient(900px 500px at 66% 34%, rgba(217,173,92,.16), transparent 60%),
+    radial-gradient(600px 420px at 45% 10%, rgba(255,244,215,.7), transparent 65%),
+    linear-gradient(145deg, #f8f5ef 0%, #eee8dc 52%, #f5f1e8 100%);
+}
+html[data-theme="light"] #screen-chat::before { background: linear-gradient(90deg, rgba(255,255,255,.32), transparent 28%, transparent 72%, rgba(80,60,30,.04)); }
+
+html[data-theme="light"] .bm-sidebar {
+  background: rgba(255,253,248,.86);
+  border-right-color: rgba(28,23,18,.08);
+  box-shadow: 8px 0 30px -28px rgba(28,23,18,.35);
+}
+html[data-theme="light"] .bm-brand-name,
+html[data-theme="light"] .bm-nav button,
+html[data-theme="light"] .bm-premium-title,
+html[data-theme="light"] .bm-model-btn,
+html[data-theme="light"] .bm-top-btn,
+html[data-theme="light"] .bm-model-menu button,
+html[data-theme="light"] .bm-empty h1,
+html[data-theme="light"] .bm-feature,
+html[data-theme="light"] .bm-composer textarea { color: var(--workspace-text); }
+html[data-theme="light"] .bm-brand-sub,
+html[data-theme="light"] .bm-nav-label,
+html[data-theme="light"] .bm-premium p,
+html[data-theme="light"] .bm-model-menu .model-sub,
+html[data-theme="light"] .bm-empty .bm-sub,
+html[data-theme="light"] .bm-feature p,
+html[data-theme="light"] .bm-bottom .note { color: var(--workspace-muted); }
+html[data-theme="light"] .bm-nav button:hover,
+html[data-theme="light"] .bm-nav button.active { background: rgba(28,23,18,.055); color: #241e17; }
+html[data-theme="light"] .bm-premium {
+  background: linear-gradient(155deg, rgba(217,173,92,.14), rgba(255,255,255,.7));
+  border-color: rgba(168,122,34,.22);
+}
+html[data-theme="light"] .bm-model-btn,
+html[data-theme="light"] .bm-top-btn,
+html[data-theme="light"] .bm-mobile-menu {
+  background: rgba(255,255,255,.72);
+  border-color: rgba(28,23,18,.09);
+  color: #241e17;
+  box-shadow: 0 10px 30px -24px rgba(28,23,18,.3);
+}
+html[data-theme="light"] .bm-model-btn svg,
+html[data-theme="light"] .bm-top-btn svg { color: #756b5c; }
+html[data-theme="light"] .bm-model-menu {
+  background: rgba(255,253,248,.97);
+  border-color: rgba(168,122,34,.22);
+  box-shadow: 0 25px 70px -25px rgba(45,35,20,.28);
+}
+html[data-theme="light"] .bm-model-menu button { color: #241e17; }
+html[data-theme="light"] .bm-model-menu .model-sub { color: #8b806f; }
+html[data-theme="light"] .bm-model-menu button:hover,
+html[data-theme="light"] .bm-model-menu button[aria-selected="true"] { background: rgba(217,173,92,.12); }
+
+html[data-theme="light"] .bm-tool {
+  background: rgba(255,255,255,.58);
+  border-color: rgba(28,23,18,.09);
+  color: #756b5c;
+}
+html[data-theme="light"] .bm-tool:hover { color: #604814; background: rgba(217,173,92,.10); }
+html[data-theme="light"] .bm-composer {
+  background: linear-gradient(145deg, rgba(255,255,255,.82), rgba(255,255,255,.58));
+  border-color: rgba(168,122,34,.34);
+  box-shadow: 0 24px 70px -38px rgba(61,45,21,.3), inset 0 1px 0 rgba(255,255,255,.95);
+}
+html[data-theme="light"] .bm-composer textarea::placeholder { color: #978c7b; }
+html[data-theme="light"] .bm-mini { color: #756b5c; }
+html[data-theme="light"] .bm-mini:hover { background: rgba(28,23,18,.045); color: #4e402d; }
+html[data-theme="light"] .bm-feature {
+  background: rgba(255,255,255,.65);
+  border-color: rgba(28,23,18,.075);
+  color: #30271d;
+  box-shadow: 0 12px 35px -30px rgba(45,35,20,.35);
+}
+html[data-theme="light"] .bm-feature:hover { background: rgba(217,173,92,.075); }
+html[data-theme="light"] .bm-feature-tag { color: #8d806d; border-color: rgba(28,23,18,.08); }
+html[data-theme="light"] .bm-thread-wrap .a-wrap { background: rgba(255,255,255,.5); }
+
+/* Keep the gold identity of the orb in both themes. */
+html[data-theme="light"] .bm-orb-core { mix-blend-mode: multiply; }
+
+/* Prevent browser-native white/black controls from fighting the theme. */
+html[data-theme="light"] input,
+html[data-theme="light"] textarea,
+html[data-theme="light"] button { color-scheme: light; }
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] button { color-scheme: dark; }
+
 </style>
 </head>
 <body class="dark">
