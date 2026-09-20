@@ -346,7 +346,7 @@ main { flex: 1; }
   <form class="card" id="loginForm" novalidate>
     <div class="card-mark">BlackMamer <b>AI</b></div>
     <h1>Selamat datang</h1>
-    <p class="lede">Masuk dulu buat lanjut ngobrol sama AI-nya.</p>
+    <p class="lede">Masukin email kamu, nanti dikirim kode OTP buat masuk.</p>
     <div id="loginErr"></div>
     <div class="field">
       <label for="loginEmail">Alamat email</label>
@@ -355,20 +355,10 @@ main { flex: 1; }
         <input id="loginEmail" type="email" inputmode="email" autocomplete="email" placeholder="nama@email.com" required>
       </div>
     </div>
-    <div class="field">
-      <label for="loginPassword">Password</label>
-      <div class="box">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="9.5" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="currentColor" stroke-width="1.7"/></svg>
-        <input id="loginPassword" type="password" autocomplete="current-password" placeholder="••••••••" required>
-        <button class="eye" type="button" id="toggleEye" aria-label="Tampilkan password">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="2.6" stroke="currentColor" stroke-width="1.7"/></svg>
-        </button>
-      </div>
-    </div>
     <button class="btn-gold" id="loginSubmit" type="submit">
       <span>Kirim kode OTP</span>
     </button>
-    <p class="card-foot">Belum ada akses? Hubungi admin BlackMamer Studio buat dapat password.</p>
+    <p class="card-foot">Kode verifikasi dikirim ke email kamu, berlaku 5 menit.</p>
   </form>
 </section>
 
@@ -493,9 +483,9 @@ main { flex: 1; }
   }
 
   /* ================= LOGIN ================= */
-  const loginForm = $("#loginForm"), loginEmail = $("#loginEmail"), loginPassword = $("#loginPassword");
+  const loginForm = $("#loginForm"), loginEmail = $("#loginEmail");
   const loginSubmit = $("#loginSubmit"), loginErr = $("#loginErr");
-  let pendingEmail = "", pendingPassword = "";
+  let pendingEmail = "";
 
   function setErr(el, msg) {
     el.innerHTML = msg
@@ -507,25 +497,20 @@ main { flex: 1; }
     btn.innerHTML = isBusy ? `<span class="spin"></span><span>Memproses…</span>` : `<span>${label}</span>`;
   }
 
-  $("#toggleEye").addEventListener("click", () => {
-    loginPassword.type = loginPassword.type === "password" ? "text" : "password";
-  });
-
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     setErr(loginErr, "");
     const email = loginEmail.value.trim();
-    const password = loginPassword.value;
-    if (!email || !password) return setErr(loginErr, "Isi email dan password dulu.");
+    if (!email) return setErr(loginErr, "Isi email dulu.");
     busyBtn(loginSubmit, true);
     try {
       const r = await fetch("/api/auth/login", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email }),
       });
       const data = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(data.error || "Gagal login.");
-      pendingEmail = email; pendingPassword = password;
+      pendingEmail = email;
       startOtpScreen(data);
     } catch (err) {
       setErr(loginErr, err.message || "Gagal login.");
@@ -595,7 +580,6 @@ main { flex: 1; }
       });
       const data = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(data.error || "Verifikasi gagal.");
-      pendingPassword = "";
       enterChat();
     } catch (err) {
       setErr(otpErr, err.message || "Verifikasi gagal.");
@@ -607,12 +591,12 @@ main { flex: 1; }
   otpSubmit.addEventListener("click", verifyOtp);
 
   resendBtn.addEventListener("click", async () => {
-    if (resendBtn.disabled || !pendingEmail || !pendingPassword) return;
+    if (resendBtn.disabled || !pendingEmail) return;
     setErr(otpErr, "");
     try {
       const r = await fetch("/api/auth/login", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: pendingEmail, password: pendingPassword }),
+        body: JSON.stringify({ email: pendingEmail }),
       });
       const data = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(data.error || "Gagal kirim ulang.");
@@ -626,7 +610,7 @@ main { flex: 1; }
   otpBack.addEventListener("click", () => {
     clearInterval(resendCooldownId);
     showScreen("login");
-    loginPassword.focus();
+    loginEmail.focus();
   });
 
   /* ================= AGENT SELECTOR ================= */
