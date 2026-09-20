@@ -733,6 +733,28 @@ main { flex: 1; }
   .flow-bg::before, .flow-bg::after { animation: none; }
 }
 
+/* ---------- workspace interaction + persistent composer ---------- */
+.bm-center { overflow-y:auto; overflow-x:hidden; justify-content:flex-start; }
+.bm-empty { flex:none; padding-top:clamp(3rem,8vh,7rem); padding-bottom:1.25rem; transition:width .25s ease; }
+.bm-empty.has-chat { order:2; width:min(760px,100%); position:sticky; bottom:0; z-index:12; padding:1rem 0 .45rem; margin-top:auto; background:linear-gradient(to bottom, transparent 0%, var(--page-bg) 28%, var(--page-bg) 100%); }
+.bm-empty.has-chat > .bm-orb,
+.bm-empty.has-chat > h1,
+.bm-empty.has-chat > .bm-sub,
+.bm-empty.has-chat > .bm-tools,
+.bm-empty.has-chat > .bm-cards { display:none; }
+.bm-empty.has-chat .bm-composer { width:min(760px,100%); }
+.bm-empty.has-chat + .bm-thread-wrap { order:1; width:min(760px,100%); }
+.bm-tool, .bm-mini, .bm-feature, .bm-side-new, .bm-premium button, .bm-nav button, .bm-model-btn, .bm-top-btn, .bm-send { transition:transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease, color .18s ease; }
+.bm-tool:active, .bm-mini:active, .bm-feature:active, .bm-side-new:active, .bm-premium button:active, .bm-nav button:active, .bm-model-btn:active, .bm-top-btn:active, .bm-send:active { transform:scale(.97); }
+.bm-toast { position:fixed; left:50%; bottom:1.25rem; z-index:100; transform:translate(-50%, 18px); opacity:0; pointer-events:none; max-width:min(92vw,420px); padding:.7rem 1rem; border:1px solid rgba(217,173,92,.28); border-radius:12px; background:rgba(13,11,9,.92); color:#f4ead7; box-shadow:0 18px 50px -25px rgba(0,0,0,.8); backdrop-filter:blur(18px); font:600 .72rem var(--f-body); text-align:center; transition:opacity .2s ease, transform .2s ease; }
+.bm-toast.show { opacity:1; transform:translate(-50%,0); }
+html[data-theme="light"] .bm-toast { background:rgba(255,253,248,.96); color:#33291c; border-color:rgba(168,122,34,.25); box-shadow:0 18px 50px -25px rgba(61,45,21,.25); }
+@media (max-width:820px) {
+  .bm-center { padding:1rem .75rem 6rem; }
+  .bm-empty { padding-top:3rem; }
+  .bm-empty.has-chat { width:100%; }
+}
+
 /* =========================================================
    BLACKMAMER AI — THEME FIX v2
    ========================================================= */
@@ -957,20 +979,20 @@ html[data-theme="dark"] button { color-scheme: dark; }
       </button>
       <div class="bm-nav-label">Features</div>
       <nav class="bm-nav">
-        <button class="active" type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M5 6.5A3.5 3.5 0 0 1 8.5 3H19v14.5A3.5 3.5 0 0 1 15.5 21H8.5A3.5 3.5 0 0 1 5 17.5v-11Z" stroke="currentColor" stroke-width="1.6"/><path d="M5 16h10.5a3.5 3.5 0 0 1 3.5 3.5V21" stroke="currentColor" stroke-width="1.6"/></svg>Chat</button>
-        <button type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M6 5h12a2 2 0 0 1 2 2v12H4V7a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6"/><path d="M8 3v4M16 3v4M4 10h16" stroke="currentColor" stroke-width="1.6"/></svg>Archived</button>
-        <button type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4h14v16H5z" stroke="currentColor" stroke-width="1.6"/><path d="m8 8 3 3 2-2 3 3M8 16h8" stroke="currentColor" stroke-width="1.6"/></svg>Library</button>
+        <button class="active" type="button" data-nav="chat"><svg viewBox="0 0 24 24" fill="none"><path d="M5 6.5A3.5 3.5 0 0 1 8.5 3H19v14.5A3.5 3.5 0 0 1 15.5 21H8.5A3.5 3.5 0 0 1 5 17.5v-11Z" stroke="currentColor" stroke-width="1.6"/><path d="M5 16h10.5a3.5 3.5 0 0 1 3.5 3.5V21" stroke="currentColor" stroke-width="1.6"/></svg>Chat</button>
+        <button type="button" data-nav="archived"><svg viewBox="0 0 24 24" fill="none"><path d="M6 5h12a2 2 0 0 1 2 2v12H4V7a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6"/><path d="M8 3v4M16 3v4M4 10h16" stroke="currentColor" stroke-width="1.6"/></svg>Archived</button>
+        <button type="button" data-nav="library"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4h14v16H5z" stroke="currentColor" stroke-width="1.6"/><path d="m8 8 3 3 2-2 3 3M8 16h8" stroke="currentColor" stroke-width="1.6"/></svg>Library</button>
       </nav>
       <div class="bm-nav-label">Workspaces</div>
       <nav class="bm-nav">
-        <button type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7.5 12 4l8 3.5v9L12 20l-8-3.5v-9Z" stroke="currentColor" stroke-width="1.6"/><path d="m8 9 4 2 4-2M12 11v6" stroke="currentColor" stroke-width="1.6"/></svg>Projects</button>
-        <button type="button"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><circle cx="9" cy="10" r="1.5" stroke="currentColor" stroke-width="1.6"/><path d="m6.5 16 4-4 2.5 2 2-2 2.5 4" stroke="currentColor" stroke-width="1.6"/></svg>Assets</button>
-        <button type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4h14v16H5z" stroke="currentColor" stroke-width="1.6"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.6"/></svg>Prompts</button>
+        <button type="button" data-nav="projects"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7.5 12 4l8 3.5v9L12 20l-8-3.5v-9Z" stroke="currentColor" stroke-width="1.6"/><path d="m8 9 4 2 4-2M12 11v6" stroke="currentColor" stroke-width="1.6"/></svg>Projects</button>
+        <button type="button" data-nav="assets"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><circle cx="9" cy="10" r="1.5" stroke="currentColor" stroke-width="1.6"/><path d="m6.5 16 4-4 2.5 2 2-2 2.5 4" stroke="currentColor" stroke-width="1.6"/></svg>Assets</button>
+        <button type="button" data-nav="prompts"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4h14v16H5z" stroke="currentColor" stroke-width="1.6"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.6"/></svg>Prompts</button>
       </nav>
       <div class="bm-premium">
         <div class="bm-premium-title"><svg viewBox="0 0 24 24" fill="none"><path d="m12 3 2.6 5.3L20 9l-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5L4 9l5.4-.7L12 3Z" stroke="currentColor" stroke-width="1.5"/></svg>BlackMamer Pro</div>
         <p>Unlock higher limits, faster responses and premium AI tools.</p>
-        <button type="button">Upgrade</button>
+        <button type="button" id="upgradeBtn">Upgrade</button>
       </div>
     </aside>
 
@@ -999,21 +1021,22 @@ html[data-theme="dark"] button { color-scheme: dark; }
           <h1>Ready to create <span>something new?</span></h1>
           <p class="bm-sub">Your private AI workspace powered by the BlackMamer engine. Ask anything, build anything, ship faster.</p>
           <div class="bm-tools">
-            <button class="bm-tool" type="button">✦ Create Image</button>
-            <button class="bm-tool" type="button">⌁ Brainstorm</button>
-            <button class="bm-tool" type="button">◈ Make a Plan</button>
+            <button class="bm-tool" type="button" data-prompt="Create an image concept for my project">✦ Create Image</button>
+            <button class="bm-tool" type="button" data-prompt="Help me brainstorm ideas for my project">⌁ Brainstorm</button>
+            <button class="bm-tool" type="button" data-prompt="Make a detailed plan for my project step by step">◈ Make a Plan</button>
           </div>
           <div class="bm-composer">
             <textarea id="input" rows="1" placeholder="Ask BlackMamer AI anything…" aria-label="Pesan" enterkeyhint="send"></textarea>
             <div class="bm-composer-row">
               <div class="bm-composer-left">
-                <button class="bm-mini" type="button"><svg viewBox="0 0 24 24" fill="none"><path d="m20 11.5-7.8 7.8a5 5 0 0 1-7.1-7.1L13 4.3a3.5 3.5 0 0 1 5 5l-8.1 8.1a2 2 0 0 1-2.8-2.8l7.5-7.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>Attach</button>
+                <button class="bm-mini" id="attachBtn" type="button"><svg viewBox="0 0 24 24" fill="none"><path d="m20 11.5-7.8 7.8a5 5 0 0 1-7.1-7.1L13 4.3a3.5 3.5 0 0 1 5 5l-8.1 8.1a2 2 0 0 1-2.8-2.8l7.5-7.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>Attach</button>
                 <button class="bm-mini" type="button" id="configMini">⌘ Settings</button>
-                <button class="bm-mini" type="button">⊞ Options</button>
+                <button class="bm-mini" id="optionsBtn" type="button">⊞ Options</button>
               </div>
               <button class="bm-send" id="send" type="button" aria-label="Kirim" disabled><svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M10 16V4M4.5 9.5 10 4l5.5 5.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"/></svg></button>
             </div>
           </div>
+          <input id="filePicker" type="file" hidden multiple>
           <div class="bm-cards" id="starters">
             <button class="bm-feature" type="button" data-prompt="Create an image concept for my project"><div class="bm-feature-top"><span class="bm-feature-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="3" stroke="currentColor" stroke-width="1.6"/><path d="m7 15 3-3 2 2 3-4 2 3" stroke="currentColor" stroke-width="1.6"/></svg></span><span class="bm-feature-tag">Create</span></div><strong>Image Generator</strong><p>Create visuals and concepts from text.</p></button>
             <button class="bm-feature" type="button" data-prompt="Help me plan a new project step by step"><div class="bm-feature-top"><span class="bm-feature-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M5 5h14v14H5z" stroke="currentColor" stroke-width="1.6"/><path d="M8 9h8M8 13h6" stroke="currentColor" stroke-width="1.6"/></svg></span><span class="bm-feature-tag">Plan</span></div><strong>AI Workspace</strong><p>Turn ideas into structured plans and tasks.</p></button>
@@ -1026,6 +1049,7 @@ html[data-theme="dark"] button { color-scheme: dark; }
     </div>
   </div>
 </div>
+<div class="bm-toast" id="bmToast" role="status" aria-live="polite"></div>
 
 <script>
 (() => {
@@ -1256,7 +1280,7 @@ html[data-theme="dark"] button { color-scheme: dark; }
   function renderAgentMenu() {
     agentMenu.innerHTML = AGENTS.map((a) => `
       <button type="button" role="menuitemradio" aria-selected="${a.id === currentAgent}" data-agent="${a.id}">
-        <span>${a.label}<span class="sub">${a.sub}</span></span>
+        <span><span class="model-name">${a.label}</span><span class="model-sub">${a.sub}</span></span>
         ${a.id === currentAgent ? "✓" : ""}
       </button>`).join("");
     agentLabel.textContent = (AGENTS.find((a) => a.id === currentAgent) || AGENTS[0]).label;
@@ -1349,7 +1373,8 @@ html[data-theme="dark"] button { color-scheme: dark; }
 
   function render() {
     const empty = messages.length === 0 && !busy && !error;
-    hero.hidden = !empty;
+    hero.hidden = false;
+    hero.classList.toggle("has-chat", !empty);
     thread.hidden = empty;
 
     let out = "";
@@ -1423,9 +1448,65 @@ html[data-theme="dark"] button { color-scheme: dark; }
   });
   sendBtn.addEventListener("click", () => send(input.value));
 
+  /* ================= WORKSPACE BUTTONS ================= */
+  const toastEl = $("#bmToast");
+  let toastTimer = null;
+  function toast(message) {
+    if (!toastEl) return;
+    toastEl.textContent = message;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove("show"), 1800);
+  }
+
+  function promptComposer(text) {
+    input.value = text;
+    fit();
+    input.focus({ preventScroll: true });
+    input.setSelectionRange(input.value.length, input.value.length);
+  }
+
+  document.querySelectorAll(".bm-tool[data-prompt]").forEach((b) => {
+    b.addEventListener("click", () => promptComposer(b.dataset.prompt));
+  });
+
+  $("#attachBtn")?.addEventListener("click", () => $("#filePicker")?.click());
+  $("#filePicker")?.addEventListener("change", (e) => {
+    const files = [...(e.target.files || [])];
+    if (!files.length) return;
+    const names = files.map(f => f.name).join(", ");
+    toast(`File dipilih: ${names}`);
+    // The current /api/chat contract only accepts text, so keep the file local instead of
+    // pretending it was uploaded. The selected filename is inserted into the prompt.
+    promptComposer(`Gunakan file ini sebagai referensi: ${names}\n\n`);
+  });
+
+  $("#optionsBtn")?.addEventListener("click", () => {
+    toast("Options: Shift+Enter untuk baris baru • Enter untuk kirim");
+  });
+  $("#upgradeBtn")?.addEventListener("click", () => toast("BlackMamer Pro siap dihubungkan ke sistem pembayaran."));
+
+  document.querySelectorAll("[data-nav]").forEach((b) => {
+    b.addEventListener("click", () => {
+      document.querySelectorAll("[data-nav]").forEach(x => x.classList.remove("active"));
+      b.classList.add("active");
+      const view = b.dataset.nav;
+      if (view === "chat") {
+        if (messages.length) render();
+        input.focus({ preventScroll: true });
+        return;
+      }
+      const labels = { archived:"Archived", library:"Library", projects:"Projects", assets:"Assets", prompts:"Prompts" };
+      toast(`${labels[view] || view} dipilih — panel workspace akan memakai data lokal kamu.`);
+    });
+  });
+
   const newChat = () => {
     if (busy) return;
-    messages = []; error = null; persist(); render(); input.focus(); window.scrollTo({ top: 0 });
+    messages = []; error = null; persist(); render();
+    document.querySelectorAll("[data-nav]").forEach(x => x.classList.remove("active"));
+    document.querySelector('[data-nav="chat"]')?.classList.add("active");
+    input.focus(); window.scrollTo({ top: 0 });
   };
   $("#sideNewChat")?.addEventListener("click", newChat);
   $("#mobileNewChat")?.addEventListener("click", newChat);
