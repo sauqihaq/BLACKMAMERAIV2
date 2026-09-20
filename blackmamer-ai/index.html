@@ -475,6 +475,111 @@ html[data-theme="light"] .otp-row input { background: rgba(255,255,255,.4); }
   }
 }
 
+
+/* =========================================================
+   BLACKMAMER AI — premium workspace UI
+   ========================================================= */
+#screen-chat {
+  position: relative;
+  min-height: 100dvh !important;
+  background:
+    radial-gradient(900px 500px at 66% 34%, rgba(217,173,92,.13), transparent 60%),
+    radial-gradient(600px 420px at 45% 10%, rgba(255,214,137,.06), transparent 65%),
+    linear-gradient(145deg, #080707 0%, #0d0a08 48%, #070707 100%);
+  overflow: hidden;
+}
+#screen-chat::before {
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(90deg, rgba(0,0,0,.3), transparent 28%, transparent 72%, rgba(0,0,0,.18));
+}
+.bm-workspace { position:relative; z-index:1; display:grid; grid-template-columns:236px minmax(0,1fr); min-height:100dvh; }
+.bm-sidebar {
+  position:relative; display:flex; flex-direction:column; gap:1.1rem;
+  padding:1rem .8rem .8rem; background:rgba(3,3,3,.86); border-right:1px solid rgba(255,255,255,.07);
+  backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px);
+}
+.bm-brand { display:flex; align-items:center; gap:.65rem; padding:.25rem .4rem .7rem; }
+.bm-brand-mark { width:31px; height:31px; border-radius:10px; display:grid; place-items:center; color:#171007; font:900 .72rem var(--f-display); background:linear-gradient(145deg,#ffe5a9,#d9ad5c 55%,#79551f); box-shadow:0 0 24px rgba(217,173,92,.24); }
+.bm-brand-name { font:800 1rem var(--f-display); letter-spacing:-.025em; color:#f7f1e5; }
+.bm-brand-name b { color:var(--gold-bright); }
+.bm-side-new { width:100%; display:flex; align-items:center; gap:.55rem; border:1px solid rgba(217,173,92,.25); border-radius:12px; padding:.7rem .8rem; background:linear-gradient(145deg,rgba(217,173,92,.13),rgba(255,255,255,.025)); color:var(--ink); cursor:pointer; font-weight:700; }
+.bm-side-new:hover { border-color:rgba(217,173,92,.55); background:rgba(217,173,92,.16); }
+.bm-side-new svg { width:16px; height:16px; color:var(--gold-bright); }
+.bm-nav-label { margin:.1rem .45rem -.4rem; color:#6e685e; font-size:.66rem; text-transform:uppercase; letter-spacing:.14em; font-weight:800; }
+.bm-nav { display:grid; gap:.18rem; }
+.bm-nav button { width:100%; display:flex; align-items:center; gap:.65rem; border:0; border-radius:10px; padding:.58rem .65rem; background:transparent; color:#a8a094; cursor:pointer; text-align:left; font:600 .78rem var(--f-body); }
+.bm-nav button:hover,.bm-nav button.active { background:rgba(255,255,255,.055); color:#f5eee3; }
+.bm-nav svg { width:15px; height:15px; flex:none; }
+.bm-premium { margin-top:auto; border:1px solid rgba(217,173,92,.2); border-radius:15px; padding:.85rem; background:linear-gradient(155deg,rgba(217,173,92,.12),rgba(255,255,255,.025)); box-shadow:0 20px 45px -30px rgba(217,173,92,.45); }
+.bm-premium-title { display:flex; align-items:center; gap:.45rem; font:800 .8rem var(--f-display); color:#f4ecdf; }
+.bm-premium-title svg { width:14px; color:var(--gold-bright); }
+.bm-premium p { margin:.4rem 0 .75rem; color:#827a6e; font-size:.66rem; line-height:1.45; }
+.bm-premium button { width:100%; border:0; border-radius:9px; padding:.52rem; color:#1b1408; background:linear-gradient(145deg,#f5cf8a,#b78738); font:800 .7rem var(--f-body); cursor:pointer; }
+.bm-main { min-width:0; display:flex; flex-direction:column; min-height:100dvh; }
+.bm-topbar { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1rem 1.15rem; }
+.bm-model-wrap { position:relative; }
+.bm-model-btn,.bm-top-btn { display:flex; align-items:center; gap:.45rem; border:1px solid rgba(255,255,255,.09); border-radius:12px; background:rgba(0,0,0,.4); color:#f4eee3; padding:.55rem .75rem; cursor:pointer; font:700 .72rem var(--f-body); box-shadow:0 10px 30px -22px rgba(0,0,0,.9); }
+.bm-model-btn:hover,.bm-top-btn:hover { border-color:rgba(217,173,92,.4); }
+.bm-model-btn svg,.bm-top-btn svg { width:13px; height:13px; color:#9b9386; }
+.bm-model-dot { width:7px; height:7px; border-radius:50%; background:#eac579; box-shadow:0 0 12px rgba(234,197,121,.7); }
+.bm-model-menu { position:absolute; top:calc(100% + .5rem); left:0; z-index:50; width:220px; padding:.45rem; border:1px solid rgba(217,173,92,.2); border-radius:14px; background:rgba(13,11,9,.95); backdrop-filter:blur(24px); box-shadow:0 25px 70px -25px rgba(0,0,0,.95); }
+.bm-model-menu button { width:100%; display:flex; align-items:center; justify-content:space-between; border:0; border-radius:9px; background:transparent; color:#eae3d8; padding:.65rem; cursor:pointer; text-align:left; }
+.bm-model-menu button:hover,.bm-model-menu button[aria-selected="true"] { background:rgba(217,173,92,.11); }
+.bm-model-menu .model-name { font:800 .76rem var(--f-display); }
+.bm-model-menu .model-sub { display:block; margin-top:.14rem; color:#746d61; font:500 .62rem var(--f-body); }
+.bm-top-actions { display:flex; align-items:center; gap:.45rem; }
+.bm-mobile-menu { display:none; }
+.bm-center { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem 1.2rem 8rem; min-height:0; }
+.bm-empty { width:min(780px,100%); text-align:center; display:flex; flex-direction:column; align-items:center; }
+.bm-orb { position:relative; width:72px; height:72px; margin-bottom:1.35rem; border-radius:50%; background:radial-gradient(circle at 32% 25%,#fff0c5 0%,#f2c66e 16%,#c88f36 39%,#6e4319 62%,#20150b 100%); box-shadow:0 0 0 1px rgba(255,224,162,.45) inset,0 0 28px rgba(217,173,92,.5),0 0 85px rgba(217,173,92,.16); animation:bmOrbFloat 4.5s ease-in-out infinite; }
+.bm-orb::before,.bm-orb::after { content:""; position:absolute; inset:-11px; border:1px solid rgba(217,173,92,.22); border-radius:50%; animation:bmOrbRing 3.4s ease-out infinite; }
+.bm-orb::after { inset:-21px; opacity:.45; animation-delay:1s; }
+.bm-orb-core { position:absolute; inset:15px; border-radius:50%; background:radial-gradient(circle at 35% 25%,rgba(255,248,225,.95),rgba(255,255,255,.08) 35%,transparent 70%); mix-blend-mode:screen; }
+@keyframes bmOrbFloat { 0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-7px) rotate(5deg)} }
+@keyframes bmOrbRing { 0%{transform:scale(.65);opacity:.75}100%{transform:scale(1.2);opacity:0} }
+.bm-empty h1 { margin:0; font:700 clamp(2rem,4vw,3rem)/1.05 var(--f-display); letter-spacing:-.045em; color:#f5efe6; }
+.bm-empty h1 span { background:linear-gradient(120deg,#f8f0e3 10%,#e8be72 70%,#fff1c9); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.bm-empty .bm-sub { margin:.8rem auto 0; max-width:550px; color:#7e7669; font:500 .82rem/1.55 var(--f-body); }
+.bm-tools { display:flex; flex-wrap:wrap; justify-content:center; gap:.45rem; margin:1.5rem 0 .55rem; }
+.bm-tool { border:1px solid rgba(255,255,255,.09); border-radius:10px; background:rgba(255,255,255,.025); color:#bdb4a5; padding:.45rem .65rem; cursor:pointer; font:600 .66rem var(--f-body); }
+.bm-tool:hover { border-color:rgba(217,173,92,.35); color:#ead5aa; background:rgba(217,173,92,.07); }
+.bm-composer { width:min(650px,100%); border:1px solid rgba(217,173,92,.34); border-radius:18px; background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.025)); box-shadow:0 24px 70px -38px rgba(0,0,0,.95), inset 0 1px 0 rgba(255,255,255,.08); backdrop-filter:blur(24px); overflow:hidden; }
+.bm-composer textarea { width:100%; min-height:74px; box-sizing:border-box; border:0; outline:0; resize:none; background:transparent; color:#f3eee6; padding:.9rem 1rem .25rem; font:500 .82rem/1.5 var(--f-body); }
+.bm-composer textarea::placeholder { color:#70695e; }
+.bm-composer-row { display:flex; align-items:center; justify-content:space-between; gap:.5rem; padding:.25rem .55rem .55rem .7rem; }
+.bm-composer-left { display:flex; align-items:center; gap:.1rem; }
+.bm-mini { display:flex; align-items:center; gap:.32rem; border:0; background:transparent; color:#8c8477; border-radius:8px; padding:.4rem .45rem; cursor:pointer; font:600 .64rem var(--f-body); }
+.bm-mini:hover { background:rgba(255,255,255,.05); color:#d8c9ae; }
+.bm-mini svg { width:13px; height:13px; }
+.bm-send { width:34px; height:34px; border:0; border-radius:11px; display:grid; place-items:center; background:linear-gradient(145deg,#f4ce83,#a8792d); color:#1b1205; cursor:pointer; box-shadow:0 0 18px rgba(217,173,92,.22); }
+.bm-send:disabled { opacity:.3; cursor:not-allowed; box-shadow:none; }
+.bm-cards { width:min(650px,100%); display:grid; grid-template-columns:repeat(3,1fr); gap:.45rem; margin-top:.55rem; }
+.bm-feature { min-height:88px; text-align:left; border:1px solid rgba(255,255,255,.07); border-radius:13px; background:rgba(0,0,0,.3); padding:.7rem; color:#e5ded1; cursor:pointer; transition:.2s ease; }
+.bm-feature:hover { transform:translateY(-2px); border-color:rgba(217,173,92,.35); background:rgba(217,173,92,.055); }
+.bm-feature-top { display:flex; justify-content:space-between; align-items:center; gap:.5rem; }
+.bm-feature-icon { width:23px; height:23px; display:grid; place-items:center; border-radius:7px; background:rgba(217,173,92,.1); color:#e7bd6c; }
+.bm-feature-icon svg { width:13px; height:13px; }
+.bm-feature-tag { border:1px solid rgba(255,255,255,.08); border-radius:999px; padding:.18rem .35rem; color:#80786d; font-size:.55rem; font-weight:700; }
+.bm-feature strong { display:block; margin-top:.65rem; font:700 .72rem var(--f-display); }
+.bm-feature p { margin:.22rem 0 0; color:#6f685d; font:500 .59rem/1.4 var(--f-body); }
+.bm-thread-wrap { width:min(760px,100%); margin:0 auto; }
+.bm-thread-wrap .thread { width:100%; }
+.bm-thread-wrap .u { background:linear-gradient(155deg,rgba(217,173,92,.2),rgba(217,173,92,.07)); }
+.bm-thread-wrap .a-wrap { background:rgba(255,255,255,.025); }
+.bm-bottom { padding:.6rem 1rem max(.7rem,env(safe-area-inset-bottom)); display:flex; justify-content:center; }
+.bm-bottom-inner { width:min(760px,100%); }
+.bm-bottom .note { text-align:center; }
+@media (max-width:820px) {
+  .bm-workspace { grid-template-columns:1fr; }
+  .bm-sidebar { display:none; }
+  .bm-mobile-menu { display:grid; width:34px; height:34px; place-items:center; border:1px solid rgba(255,255,255,.09); border-radius:10px; background:rgba(0,0,0,.35); color:#d8d0c3; }
+  .bm-topbar { padding:.75rem; }
+  .bm-empty h1 { font-size:2rem; }
+  .bm-cards { grid-template-columns:1fr; }
+  .bm-feature { min-height:72px; }
+}
+@media (prefers-reduced-motion: reduce) { .bm-orb { animation:none; } .bm-orb::before,.bm-orb::after { animation:none; } .bm-feature:hover { transform:none; } }
+
 /* ---------- screen transition ---------- */
 .stage { animation: stage-in .45s cubic-bezier(.2,.8,.2,1) both; }
 @keyframes stage-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
@@ -701,57 +806,87 @@ main { flex: 1; }
 </section>
 
 <!-- ================= CHAT ================= -->
-<div id="screen-chat" hidden style="display:flex;flex-direction:column;min-height:100dvh;">
-<header class="top">
-  <div class="top-in">
-    <div class="brand"><span class="mark">AI</span><span class="txt">BlackMamer</span></div>
-    <div class="top-actions">
-      <div class="agent-wrap">
-        <button class="agent-btn" id="agentBtn" type="button" aria-haspopup="true" aria-expanded="false">
-          <span class="dot"></span><span id="agentLabel">Auto</span>
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <div class="agent-menu" id="agentMenu" role="menu" hidden></div>
+<div id="screen-chat" hidden>
+  <div class="bm-workspace">
+    <aside class="bm-sidebar" aria-label="BlackMamer AI sidebar">
+      <div class="bm-brand">
+        <div class="bm-brand-mark">BM</div>
+        <div class="bm-brand-name">BlackMamer <b>AI</b></div>
       </div>
-      <button class="icon-btn" id="reset" type="button" title="Chat baru" hidden>
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12a8 8 0 1 1 2.6 5.9M4 12V6m0 6h6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <button class="bm-side-new" id="sideNewChat" type="button">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        New Chat
       </button>
-      <button class="icon-btn" id="logoutBtn" type="button" title="Keluar">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 17l5-5-5-5M20 12H9M12 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
+      <div class="bm-nav-label">Features</div>
+      <nav class="bm-nav">
+        <button class="active" type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M5 6.5A3.5 3.5 0 0 1 8.5 3H19v14.5A3.5 3.5 0 0 1 15.5 21H8.5A3.5 3.5 0 0 1 5 17.5v-11Z" stroke="currentColor" stroke-width="1.6"/><path d="M5 16h10.5a3.5 3.5 0 0 1 3.5 3.5V21" stroke="currentColor" stroke-width="1.6"/></svg>Chat</button>
+        <button type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M6 5h12a2 2 0 0 1 2 2v12H4V7a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6"/><path d="M8 3v4M16 3v4M4 10h16" stroke="currentColor" stroke-width="1.6"/></svg>Archived</button>
+        <button type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4h14v16H5z" stroke="currentColor" stroke-width="1.6"/><path d="m8 8 3 3 2-2 3 3M8 16h8" stroke="currentColor" stroke-width="1.6"/></svg>Library</button>
+      </nav>
+      <div class="bm-nav-label">Workspaces</div>
+      <nav class="bm-nav">
+        <button type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7.5 12 4l8 3.5v9L12 20l-8-3.5v-9Z" stroke="currentColor" stroke-width="1.6"/><path d="m8 9 4 2 4-2M12 11v6" stroke="currentColor" stroke-width="1.6"/></svg>Projects</button>
+        <button type="button"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><circle cx="9" cy="10" r="1.5" stroke="currentColor" stroke-width="1.6"/><path d="m6.5 16 4-4 2.5 2 2-2 2.5 4" stroke="currentColor" stroke-width="1.6"/></svg>Assets</button>
+        <button type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4h14v16H5z" stroke="currentColor" stroke-width="1.6"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.6"/></svg>Prompts</button>
+      </nav>
+      <div class="bm-premium">
+        <div class="bm-premium-title"><svg viewBox="0 0 24 24" fill="none"><path d="m12 3 2.6 5.3L20 9l-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5L4 9l5.4-.7L12 3Z" stroke="currentColor" stroke-width="1.5"/></svg>BlackMamer Pro</div>
+        <p>Unlock higher limits, faster responses and premium AI tools.</p>
+        <button type="button">Upgrade</button>
+      </div>
+    </aside>
+
+    <div class="bm-main">
+      <header class="bm-topbar">
+        <div style="display:flex;align-items:center;gap:.5rem;">
+          <button class="bm-mobile-menu" id="mobileNewChat" type="button" aria-label="New chat"><svg viewBox="0 0 24 24" fill="none" width="16"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+          <div class="bm-model-wrap">
+            <button class="bm-model-btn" id="agentBtn" type="button" aria-haspopup="true" aria-expanded="false">
+              <span class="bm-model-dot"></span><span id="agentLabel">BM Nexus</span>
+              <svg viewBox="0 0 24 24" fill="none"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="bm-model-menu" id="agentMenu" role="menu" hidden></div>
+          </div>
+        </div>
+        <div class="bm-top-actions">
+          <button class="bm-top-btn" id="configBtn" type="button">Configuration <svg viewBox="0 0 24 24" fill="none"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z" stroke="currentColor" stroke-width="1.7"/><path d="M19 13.2v-2.4l-1.8-.6a5.7 5.7 0 0 0-.6-1.4l.8-1.7-1.7-1.7-1.7.8a5.7 5.7 0 0 0-1.4-.6L12 3.8H9.6L9 5.6a5.7 5.7 0 0 0-1.4.6l-1.7-.8-1.7 1.7.8 1.7a5.7 5.7 0 0 0-.6 1.4l-1.8.6v2.4l1.8.6c.1.5.3 1 .6 1.4l-.8 1.7 1.7 1.7 1.7-.8c.4.3.9.5 1.4.6l.6 1.8H12l.6-1.8c.5-.1 1-.3 1.4-.6l1.7.8 1.7-1.7-.8-1.7c.3-.4.5-.9.6-1.4l1.8-.6Z" stroke="currentColor" stroke-width="1.2"/></svg></button>
+          <button class="bm-top-btn" id="exportBtn" type="button">Export <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5M5 13v6h14v-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button class="icon-btn" id="logoutBtn" type="button" title="Keluar"><svg viewBox="0 0 24 24" fill="none"><path d="M15 17l5-5-5-5M20 12H9M12 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </header>
+
+      <main class="bm-center">
+        <section class="bm-empty" id="hero">
+          <div class="bm-orb" aria-hidden="true"><div class="bm-orb-core"></div></div>
+          <h1>Ready to create <span>something new?</span></h1>
+          <p class="bm-sub">Your private AI workspace powered by the BlackMamer engine. Ask anything, build anything, ship faster.</p>
+          <div class="bm-tools">
+            <button class="bm-tool" type="button">✦ Create Image</button>
+            <button class="bm-tool" type="button">⌁ Brainstorm</button>
+            <button class="bm-tool" type="button">◈ Make a Plan</button>
+          </div>
+          <div class="bm-composer">
+            <textarea id="input" rows="1" placeholder="Ask BlackMamer AI anything…" aria-label="Pesan" enterkeyhint="send"></textarea>
+            <div class="bm-composer-row">
+              <div class="bm-composer-left">
+                <button class="bm-mini" type="button"><svg viewBox="0 0 24 24" fill="none"><path d="m20 11.5-7.8 7.8a5 5 0 0 1-7.1-7.1L13 4.3a3.5 3.5 0 0 1 5 5l-8.1 8.1a2 2 0 0 1-2.8-2.8l7.5-7.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>Attach</button>
+                <button class="bm-mini" type="button" id="configMini">⌘ Settings</button>
+                <button class="bm-mini" type="button">⊞ Options</button>
+              </div>
+              <button class="bm-send" id="send" type="button" aria-label="Kirim" disabled><svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M10 16V4M4.5 9.5 10 4l5.5 5.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"/></svg></button>
+            </div>
+          </div>
+          <div class="bm-cards" id="starters">
+            <button class="bm-feature" type="button" data-prompt="Create an image concept for my project"><div class="bm-feature-top"><span class="bm-feature-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="3" stroke="currentColor" stroke-width="1.6"/><path d="m7 15 3-3 2 2 3-4 2 3" stroke="currentColor" stroke-width="1.6"/></svg></span><span class="bm-feature-tag">Create</span></div><strong>Image Generator</strong><p>Create visuals and concepts from text.</p></button>
+            <button class="bm-feature" type="button" data-prompt="Help me plan a new project step by step"><div class="bm-feature-top"><span class="bm-feature-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M5 5h14v14H5z" stroke="currentColor" stroke-width="1.6"/><path d="M8 9h8M8 13h6" stroke="currentColor" stroke-width="1.6"/></svg></span><span class="bm-feature-tag">Plan</span></div><strong>AI Workspace</strong><p>Turn ideas into structured plans and tasks.</p></button>
+            <button class="bm-feature" type="button" data-prompt="Help me write clean production-ready code"><div class="bm-feature-top"><span class="bm-feature-icon"><svg viewBox="0 0 24 24" fill="none"><path d="m8 8-4 4 4 4M16 8l4 4-4 4M14 5l-4 14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="bm-feature-tag">Code</span></div><strong>Dev Assistant</strong><p>Build clean, production-ready code.</p></button>
+          </div>
+        </section>
+        <section class="bm-thread-wrap" aria-live="polite"><section class="thread" id="thread" hidden></section></section>
+      </main>
+      <div class="bm-bottom"><div class="bm-bottom-inner"><p class="note">BlackMamer AI • Do not send passwords, private keys, or sensitive data.</p></div></div>
     </div>
   </div>
-</header>
-
-<main>
-  <section class="hero" id="hero">
-    <h1 aria-label="Tanya apa aja.">
-      <span class="line"><span>Tanya</span></span>
-      <span class="line"><span>apa aja.</span></span>
-    </h1>
-    <p class="sub">Kalau satu model lagi penuh, jawabannya otomatis diambil dari model lain — atau pilih sendiri agent-nya di pojok kanan atas.</p>
-    <div class="starters" id="starters">
-      <button type="button">Bikinin script Luau buat leaderboard donasi</button>
-      <button type="button">Jelasin beda RemoteEvent dan RemoteFunction</button>
-      <button type="button">Kenapa layout CSS gua pecah di HP?</button>
-      <button type="button">Tulis caption promo buat asset Roblox baru</button>
-    </div>
-  </section>
-
-  <section class="thread" id="thread" aria-live="polite" hidden></section>
-</main>
-
-<footer class="dock">
-  <div class="dock-in">
-    <div class="box2">
-      <textarea id="input" rows="1" placeholder="Tulis pertanyaan…" aria-label="Pesan" enterkeyhint="send"></textarea>
-      <button class="send2" id="send" type="button" aria-label="Kirim" disabled>
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 16V4M4.5 9.5 10 4l5.5 5.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"/></svg>
-      </button>
-    </div>
-    <p class="note">Model gratis punya batas harian. Jangan kirim data rahasia.</p>
-  </div>
-</footer>
 </div>
 
 <script>
@@ -759,14 +894,14 @@ main { flex: 1; }
   const STORE = "bm-ai-chat-v1";
   const THEME_STORE = "bm-ai-theme";
   const AGENT_STORE = "bm-ai-agent";
-  const NAMES = { groq: "Groq", gemini: "Gemini", mistral: "Mistral", nvidia: "NVIDIA", openrouter: "OpenRouter" };
+  const NAMES = { groq: "BM Velocity", gemini: "BM Aurora", mistral: "BM Forge", nvidia: "BM Titan", openrouter: "BM Core" };
   const AGENTS = [
-    { id: "auto", label: "Auto", sub: "Pindah otomatis kalau penuh" },
-    { id: "groq", label: "Groq", sub: "gpt-oss-120b" },
-    { id: "gemini", label: "Gemini", sub: "2.5 Flash" },
-    { id: "mistral", label: "Mistral", sub: "Small" },
-    { id: "nvidia", label: "NVIDIA", sub: "gpt-oss-120b" },
-    { id: "openrouter", label: "OpenRouter", sub: "gpt-oss-20b free" },
+    { id: "auto", label: "BM Nexus", sub: "Smart auto routing" },
+    { id: "groq", label: "BM Velocity", sub: "Fast response engine" },
+    { id: "gemini", label: "BM Aurora", sub: "Creative response engine" },
+    { id: "mistral", label: "BM Forge", sub: "Code & build engine" },
+    { id: "nvidia", label: "BM Titan", sub: "Deep reasoning engine" },
+    { id: "openrouter", label: "BM Core", sub: "General AI engine" },
   ];
 
   const $ = (s, r) => (r || document).querySelector(s);
@@ -988,6 +1123,7 @@ main { flex: 1; }
       </button>`).join("");
     agentLabel.textContent = (AGENTS.find((a) => a.id === currentAgent) || AGENTS[0]).label;
   }
+  agentMenu.classList.add("bm-model-menu");
   renderAgentMenu();
 
   function closeAgentMenu() { agentMenu.hidden = true; agentBtn.setAttribute("aria-expanded", "false"); }
@@ -1010,7 +1146,7 @@ main { flex: 1; }
 
   /* ================= CHAT ================= */
   const hero = $("#hero"), thread = $("#thread"), input = $("#input");
-  const sendBtn = $("#send"), resetBtn = $("#reset"), logoutBtn = $("#logoutBtn");
+  const sendBtn = $("#send"), logoutBtn = $("#logoutBtn");
 
   let messages = [];
   let busy = false;
@@ -1077,7 +1213,6 @@ main { flex: 1; }
     const empty = messages.length === 0 && !busy && !error;
     hero.hidden = !empty;
     thread.hidden = empty;
-    resetBtn.hidden = messages.length === 0;
 
     let out = "";
     messages.forEach((m, i) => {
@@ -1150,15 +1285,27 @@ main { flex: 1; }
   });
   sendBtn.addEventListener("click", () => send(input.value));
 
-  $("#starters").addEventListener("click", (e) => {
-    const b = e.target.closest("button");
-    if (b) send(b.textContent);
+  const newChat = () => {
+    if (busy) return;
+    messages = []; error = null; persist(); render(); input.focus(); window.scrollTo({ top: 0 });
+  };
+  $("#sideNewChat")?.addEventListener("click", newChat);
+  $("#mobileNewChat")?.addEventListener("click", newChat);
+  $("#configBtn")?.addEventListener("click", () => agentBtn.click());
+  $("#configMini")?.addEventListener("click", () => agentBtn.click());
+  $("#exportBtn")?.addEventListener("click", () => {
+    const payload = JSON.stringify({ app: "BlackMamer AI", exportedAt: new Date().toISOString(), messages }, null, 2);
+    const blob = new Blob([payload], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "blackmamer-ai-chat.json";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 500);
   });
 
-  resetBtn.addEventListener("click", () => {
-    if (busy) return;
-    messages = []; error = null; persist(); render(); input.focus();
-    window.scrollTo({ top: 0 });
+  $("#starters").addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (b) send(b.dataset.prompt || b.textContent);
   });
 
   const flash = (btn, label) => {
