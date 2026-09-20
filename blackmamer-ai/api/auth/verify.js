@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Email atau kode kosong." });
   }
 
-  const result = checkOtp(cleanEmail, cleanCode);
+  const result = await checkOtp(cleanEmail, cleanCode);
   if (!result.ok) {
     return res.status(401).json({ error: result.reason });
   }
