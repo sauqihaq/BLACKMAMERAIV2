@@ -82,6 +82,31 @@ html[data-theme="light"] .veil i { opacity: .55; }
 @keyframes drift { to { transform: translate(4%, 6%) scale(1.08); } }
 @media (prefers-reduced-motion: reduce) { .veil i { animation: none; } }
 
+/* ---------- flowing gold/black ribbons (login & otp only) ---------- */
+.flow-bg {
+  position: fixed; inset: 0; z-index: -1; overflow: hidden; opacity: 0;
+  transition: opacity .6s ease;
+}
+.flow-bg.on { opacity: 1; }
+.flow-bg::before, .flow-bg::after {
+  content: ""; position: absolute; inset: -30%;
+  background: conic-gradient(from 0deg at 50% 50%,
+    transparent 0deg, rgba(217,173,92,.22) 30deg, transparent 80deg,
+    transparent 160deg, rgba(217,173,92,.16) 200deg, transparent 260deg,
+    transparent 340deg, rgba(217,173,92,.22) 360deg);
+  filter: blur(40px);
+  animation: swirl 34s linear infinite;
+}
+.flow-bg::after {
+  animation-duration: 46s; animation-direction: reverse;
+  background: conic-gradient(from 90deg at 60% 40%,
+    transparent 0deg, rgba(120,90,190,.14) 40deg, transparent 100deg,
+    transparent 220deg, rgba(217,173,92,.12) 280deg, transparent 340deg);
+  filter: blur(55px);
+}
+@keyframes swirl { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .flow-bg::before, .flow-bg::after { animation: none; } }
+
 /* ---------- theme toggle ---------- */
 .theme-switch {
   position: fixed; top: max(1rem, env(safe-area-inset-top, 0px) + .6rem); right: 1rem; z-index: 40;
@@ -107,14 +132,25 @@ html[data-theme="light"] .theme-switch .thumb { transform: translateX(2.1rem); }
   padding: 2.5rem 1.25rem;
 }
 .card {
+  position: relative; overflow: hidden;
   width: min(420px, 100%);
-  background: var(--glass); backdrop-filter: blur(22px) saturate(140%);
-  border: 1px solid var(--glass-border);
+  background: linear-gradient(160deg, rgba(255,255,255,.09), rgba(255,255,255,.02));
+  backdrop-filter: blur(28px) saturate(160%);
+  -webkit-backdrop-filter: blur(28px) saturate(160%);
+  border: 1px solid rgba(255,255,255,.14);
   border-radius: 26px; padding: 2.4rem 2rem 2.1rem;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.16), inset 0 0 40px rgba(217,173,92,.03);
   animation: rise-in .6s cubic-bezier(.2,.8,.2,1) both;
 }
-@keyframes rise-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.card::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.10) 48%, transparent 62%);
+  background-size: 220% 220%; background-position: 130% 0;
+  animation: shine 6s ease-in-out infinite;
+}
+.card > * { position: relative; z-index: 1; }
+@keyframes shine { 0%, 30% { background-position: 130% 0; } 70%, 100% { background-position: -30% 0; } }
+@keyframes rise-in { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: none; } }
 .card-mark {
   display: inline-flex; align-items: center; gap: .5rem;
   font-family: var(--f-display); font-weight: 800; font-size: 1.05rem;
@@ -132,6 +168,7 @@ html[data-theme="light"] .theme-switch .thumb { transform: translateX(2.1rem); }
   display: flex; align-items: center; gap: .6rem;
   border: 1px solid var(--glass-border-soft); border-radius: 13px;
   background: rgba(0,0,0,.15); padding: .8rem .95rem;
+  transition: border-color .2s ease, box-shadow .2s ease;
 }
 html[data-theme="light"] .field .box { background: rgba(255,255,255,.4); }
 .field .box:focus-within { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(217,173,92,.18); }
@@ -145,6 +182,7 @@ html[data-theme="light"] .field .box { background: rgba(255,255,255,.4); }
 .field button.eye svg { width: 1.05rem; height: 1.05rem; }
 
 .btn-gold {
+  position: relative; overflow: hidden;
   width: 100%; border: 0; border-radius: 13px; padding: .9rem 1rem;
   background: linear-gradient(155deg, var(--gold-bright), var(--gold-dim));
   color: #1a1305; font-weight: 700; font-size: .98rem; cursor: pointer;
@@ -153,9 +191,16 @@ html[data-theme="light"] .field .box { background: rgba(255,255,255,.4); }
   transition: transform .15s ease, box-shadow .15s ease;
 }
 .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 18px 34px -14px rgba(217,173,92,.8); }
-.btn-gold:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-gold:disabled { opacity: .85; cursor: not-allowed; transform: none; }
 .btn-gold .spin { width: 1rem; height: 1rem; border-radius: 50%; border: 2px solid rgba(26,19,5,.3); border-top-color: #1a1305; animation: spin .7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+.btn-gold.is-verifying { color: #1a1305; }
+.btn-gold.is-verifying::after {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(90deg, rgba(255,255,255,.55), transparent);
+  width: 40%; animation: sweep 1.1s ease-in-out infinite;
+}
+@keyframes sweep { 0% { transform: translateX(-120%); } 100% { transform: translateX(340%); } }
 
 .card-foot { margin-top: 1.4rem; text-align: center; font-size: .88rem; color: var(--muted); }
 .card-foot button.link { border: 0; background: none; color: var(--gold-bright); font-weight: 600; cursor: pointer; padding: 0; }
@@ -164,7 +209,9 @@ html[data-theme="light"] .field .box { background: rgba(255,255,255,.4); }
   background: rgba(226,121,90,.1); border: 1px solid rgba(226,121,90,.3);
   color: var(--danger); border-radius: 11px; padding: .7rem .85rem;
   font-size: .87rem; font-weight: 600; margin-bottom: 1.1rem; line-height: 1.4;
+  animation: shake .32s ease;
 }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
 .form-err svg { flex: none; width: 1.1rem; height: 1.1rem; margin-top: .05rem; }
 .dev-hint {
   font-size: .8rem; color: var(--muted-2); background: rgba(217,173,92,.08);
@@ -178,6 +225,11 @@ html[data-theme="light"] .field .box { background: rgba(255,255,255,.4); }
   display: grid; place-items: center;
   background: linear-gradient(155deg, rgba(217,173,92,.28), rgba(217,173,92,.06));
   border: 1px solid var(--glass-border); color: var(--gold-bright);
+  animation: pulse-ring 2.4s ease-in-out infinite;
+}
+@keyframes pulse-ring {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(217,173,92,.3); }
+  50% { box-shadow: 0 0 0 10px rgba(217,173,92,0); }
 }
 .otp-icon svg { width: 1.4rem; height: 1.4rem; }
 .card.otp-card { text-align: center; }
@@ -187,14 +239,26 @@ html[data-theme="light"] .field .box { background: rgba(255,255,255,.4); }
   width: 2.6rem; height: 3.1rem; text-align: center; font-size: 1.35rem; font-weight: 700;
   border-radius: 12px; border: 1px solid var(--glass-border-soft); background: rgba(0,0,0,.15);
   color: var(--ink); outline: none;
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s cubic-bezier(.3,1.5,.5,1);
 }
 html[data-theme="light"] .otp-row input { background: rgba(255,255,255,.4); }
 .otp-row input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(217,173,92,.18); }
+.otp-row input.filled {
+  border-color: var(--gold-bright);
+  box-shadow: 0 0 0 3px rgba(217,173,92,.14), 0 6px 16px -8px rgba(217,173,92,.6);
+  animation: pop-in .22s cubic-bezier(.3,1.7,.4,1);
+}
+@keyframes pop-in { 0% { transform: scale(.82); } 55% { transform: scale(1.12); } 100% { transform: scale(1); } }
+.otp-row.shake { animation: shake .4s ease; }
 .resend { margin-top: 1.1rem; font-size: .85rem; color: var(--muted); }
 .resend button { border: 0; background: none; color: var(--gold-bright); font-weight: 700; cursor: pointer; padding: 0; }
 .resend button:disabled { color: var(--muted-2); cursor: default; }
 .back-link { display: inline-flex; align-items: center; gap: .35rem; border: 0; background: none; color: var(--muted); font-weight: 600; font-size: .85rem; cursor: pointer; margin-bottom: 1.3rem; padding: 0; }
 .back-link svg { width: 1rem; height: 1rem; }
+
+/* ---------- screen transition ---------- */
+.stage { animation: stage-in .45s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes stage-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
 /* ---------- chat screen top bar ---------- */
 .top {
@@ -304,16 +368,27 @@ main { flex: 1; }
 .err p { margin: 0 0 .65rem; }
 .err .btn { border: 1px solid var(--danger); background: none; color: var(--danger); border-radius: 9px; padding: .4rem .85rem; font-weight: 700; cursor: pointer; font-size: .85rem; }
 
-/* ---------- composer ---------- */
+/* ---------- composer (glass dock) ---------- */
 .dock { position: sticky; bottom: 0; padding: .6rem 0 max(.6rem, env(safe-area-inset-bottom, 0px)); }
 .dock-in { width: min(760px, 100% - 1.5rem); margin: 0 auto; }
 .box2 {
+  position: relative; overflow: hidden;
   display: flex; align-items: flex-end; gap: .5rem;
-  background: var(--glass-strong); backdrop-filter: blur(20px) saturate(140%);
-  border: 1px solid var(--glass-border-soft); border-radius: 20px; padding: .55rem .55rem .55rem 1.1rem;
-  box-shadow: var(--shadow);
+  background: linear-gradient(160deg, rgba(255,255,255,.1), rgba(255,255,255,.03));
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 20px; padding: .55rem .55rem .55rem 1.1rem;
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.18);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.box2::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background: linear-gradient(120deg, transparent 35%, rgba(255,255,255,.08) 50%, transparent 65%);
+  background-size: 200% 200%; background-position: 120% 0;
 }
 .box2:focus-within { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(217,173,92,.16), var(--shadow); }
+.box2 > * { position: relative; z-index: 1; }
 .box2 textarea { flex: 1; min-width: 0; border: 0; outline: none; resize: none; background: transparent; color: var(--ink); font: 500 1.02rem/1.5 var(--f-body); padding: .55rem 0; max-height: 12rem; }
 .box2 textarea::placeholder { color: var(--muted-2); }
 .send2 { flex: none; width: 2.7rem; height: 2.7rem; display: grid; place-items: center; border: 0; border-radius: 13px; background: linear-gradient(155deg, var(--gold-bright), var(--gold-dim)); color: #1a1305; cursor: pointer; }
@@ -328,12 +403,17 @@ main { flex: 1; }
   .hero .line span { animation: none; transform: none; }
   .wait i { animation: none; opacity: .7; }
   .card { animation: none; }
+  .card::before { animation: none; }
+  .otp-icon { animation: none; }
+  .stage { animation: none; }
+  .flow-bg::before, .flow-bg::after { animation: none; }
 }
 </style>
 </head>
 <body class="dark">
 
 <div class="veil" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="flow-bg" id="flowBg" aria-hidden="true"></div>
 
 <button class="theme-switch" id="themeSwitch" type="button" role="switch" aria-checked="false" aria-label="Ganti mode terang/gelap">
   <span class="thumb">
@@ -477,10 +557,13 @@ main { flex: 1; }
   });
 
   /* ================= SCREENS ================= */
+  const flowBg = $("#flowBg");
   const screens = { login: $("#screen-login"), otp: $("#screen-otp"), chat: $("#screen-chat") };
   function showScreen(name) {
     Object.entries(screens).forEach(([k, el]) => (el.hidden = k !== name));
+    flowBg.classList.toggle("on", name === "login" || name === "otp");
   }
+  showScreen("login"); // set initial flow-bg state; real screen picked at boot below
 
   /* ================= LOGIN ================= */
   const loginForm = $("#loginForm"), loginEmail = $("#loginEmail");
@@ -494,6 +577,7 @@ main { flex: 1; }
   }
   function busyBtn(btn, isBusy, label) {
     btn.disabled = isBusy;
+    btn.classList.toggle("is-verifying", isBusy);
     btn.innerHTML = isBusy ? `<span class="spin"></span><span>Memproses…</span>` : `<span>${label}</span>`;
   }
 
@@ -530,7 +614,7 @@ main { flex: 1; }
     devHint.innerHTML = loginData && loginData.devOtp
       ? `<div class="dev-hint">Mode dev (belum ada RESEND_API_KEY) — kode kamu: <b>${loginData.devOtp}</b></div>`
       : "";
-    otpInputs.forEach((i) => (i.value = ""));
+    otpInputs.forEach((i) => { i.value = ""; i.classList.remove("filled"); });
     showScreen("otp");
     otpInputs[0].focus();
     runResendCooldown(30);
@@ -552,7 +636,9 @@ main { flex: 1; }
   otpInputs.forEach((inp, idx) => {
     inp.addEventListener("input", () => {
       inp.value = inp.value.replace(/\D/g, "").slice(-1);
+      inp.classList.toggle("filled", !!inp.value);
       if (inp.value && otpInputs[idx + 1]) otpInputs[idx + 1].focus();
+      if (otpInputs.every((i) => i.value) ) verifyOtp();
     });
     inp.addEventListener("keydown", (e) => {
       if (e.key === "Backspace" && !inp.value && otpInputs[idx - 1]) otpInputs[idx - 1].focus();
@@ -562,17 +648,26 @@ main { flex: 1; }
       const text = (e.clipboardData || window.clipboardData).getData("text").replace(/\D/g, "");
       if (!text) return;
       e.preventDefault();
-      text.split("").slice(0, otpInputs.length).forEach((ch, i) => { if (otpInputs[i]) otpInputs[i].value = ch; });
+      text.split("").slice(0, otpInputs.length).forEach((ch, i) => {
+        if (otpInputs[i]) { otpInputs[i].value = ch; otpInputs[i].classList.add("filled"); }
+      });
       const nextEmpty = otpInputs.findIndex((i) => !i.value);
       (nextEmpty === -1 ? otpInputs[otpInputs.length - 1] : otpInputs[nextEmpty]).focus();
+      if (otpInputs.every((i) => i.value)) verifyOtp();
     });
   });
 
+  let verifying = false;
   async function verifyOtp() {
+    if (verifying) return;
     const code = otpInputs.map((i) => i.value).join("");
     if (code.length !== 6) return setErr(otpErr, "Isi semua 6 digit kodenya.");
     setErr(otpErr, "");
+    verifying = true;
     busyBtn(otpSubmit, true);
+    otpSubmit.querySelector("span") && (otpSubmit.querySelector("span").textContent = "");
+    otpSubmit.innerHTML = `<span class="spin"></span><span>Memverifikasi…</span>`;
+    otpSubmit.classList.add("is-verifying");
     try {
       const r = await fetch("/api/auth/verify", {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -583,9 +678,12 @@ main { flex: 1; }
       enterChat();
     } catch (err) {
       setErr(otpErr, err.message || "Verifikasi gagal.");
-      otpInputs.forEach((i) => (i.value = ""));
+      otpRow.classList.add("shake");
+      setTimeout(() => otpRow.classList.remove("shake"), 420);
+      otpInputs.forEach((i) => { i.value = ""; i.classList.remove("filled"); });
       otpInputs[0].focus();
     }
+    verifying = false;
     busyBtn(otpSubmit, false, "Verifikasi");
   }
   otpSubmit.addEventListener("click", verifyOtp);
