@@ -1,5 +1,8 @@
 {
   "name": "blackmamer-ai",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "nodemailer": "^6.9.14"
+  }
 }
