@@ -1,8 +1,7 @@
-// lib/session.js — session cookie signing & shared in-memory stores
-// Best-effort in-memory (per function instance). Cukup buat gating akses,
-// bukan sistem auth enterprise.
+// lib/session.js — session cookie signing & shared OTP store (Redis-backed)
 import crypto from "node:crypto";
 import nodemailer from "nodemailer";
+import { Redis } from "@upstash/redis";
 
 const SECRET = process.env.SESSION_SECRET || "bm-ai-dev-secret-change-me";
 const COOKIE_NAME = "bm_session";
@@ -66,40 +65,49 @@ export function clearSessionCookie(res) {
   res.setHeader("Set-Cookie", `${COOKIE_NAME}=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax`);
 }
 
-// ---------- OTP store (in-memory, per function instance) ----------
-const otpStore = new Map(); // email -> { otp, expiresAt, attempts, lastSentAt }
-const OTP_TTL_MS = 5 * 60 * 1000;
+// ---------- OTP store (Redis, shared across all function instances) ----------
+const redis = new Redis({
+  url: process.env.KV_REST_API_URL,
+  token: process.env.KV_REST_API_TOKEN,
+});
+
+const OTP_TTL_SECONDS = 5 * 60; // 5 menit
 const RESEND_COOLDOWN_MS = 30 * 1000;
 const MAX_ATTEMPTS = 5;
 
-export function issueOtp(email) {
+export async function issueOtp(email) {
+  const key = `otp:${email}`;
+  const existing = await redis.get(key);
   const now = Date.now();
-  const existing = otpStore.get(email);
+
   if (existing && now - existing.lastSentAt < RESEND_COOLDOWN_MS) {
     return { cooldown: Math.ceil((RESEND_COOLDOWN_MS - (now - existing.lastSentAt)) / 1000) };
   }
+
   const otp = String(crypto.randomInt(0, 1000000)).padStart(6, "0");
-  otpStore.set(email, { otp, expiresAt: now + OTP_TTL_MS, attempts: 0, lastSentAt: now });
-  if (otpStore.size > 5000) otpStore.clear();
+  const entry = { otp, attempts: 0, lastSentAt: now };
+  await redis.set(key, entry, { ex: OTP_TTL_SECONDS });
   return { otp };
 }
 
-export function checkOtp(email, code) {
-  const entry = otpStore.get(email);
+export async function checkOtp(email, code) {
+  const key = `otp:${email}`;
+  const entry = await redis.get(key);
+
   if (!entry) return { ok: false, reason: "Belum ada kode OTP untuk email ini." };
-  if (Date.now() > entry.expiresAt) {
-    otpStore.delete(email);
-    return { ok: false, reason: "Kode OTP sudah kedaluwarsa. Minta kode baru." };
-  }
+
   if (entry.attempts >= MAX_ATTEMPTS) {
-    otpStore.delete(email);
+    await redis.del(key);
     return { ok: false, reason: "Terlalu banyak percobaan salah. Minta kode baru." };
   }
-  entry.attempts += 1;
+
   if (entry.otp !== String(code).trim()) {
+    entry.attempts += 1;
+    await redis.set(key, entry, { ex: OTP_TTL_SECONDS });
     return { ok: false, reason: "Kode OTP salah." };
   }
-  otpStore.delete(email);
+
+  await redis.del(key);
   return { ok: true };
 }
 
