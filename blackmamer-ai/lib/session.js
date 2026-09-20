@@ -2,6 +2,7 @@
 // Best-effort in-memory (per function instance). Cukup buat gating akses,
 // bukan sistem auth enterprise.
 import crypto from "node:crypto";
+import nodemailer from "nodemailer";
 
 const SECRET = process.env.SESSION_SECRET || "bm-ai-dev-secret-change-me";
 const COOKIE_NAME = "bm_session";
@@ -102,28 +103,62 @@ export function checkOtp(email, code) {
   return { ok: true };
 }
 
-export async function sendOtpEmail(email, otp) {
+const OTP_EMAIL_HTML = (otp) => `<div style="font-family:sans-serif;background:#0a0a0a;color:#fff;padding:32px;border-radius:16px">
+  <p style="color:#fbbf24;letter-spacing:.2em;font-size:12px;margin:0 0 12px">BLACKMAMER AI</p>
+  <h2 style="margin:0 0 8px">Kode verifikasi kamu</h2>
+  <p style="color:#a3a3a3;margin:0 0 24px">Berlaku 5 menit. Jangan bagikan ke siapa pun.</p>
+  <div style="font-size:36px;font-weight:800;letter-spacing:.3em;color:#fbbf24">${otp}</div>
+</div>`;
+
+let gmailTransporter; // cached across invocations dalam 1 function instance
+function getGmailTransporter() {
+  const user = process.env.GMAIL_USER;
+  const pass = process.env.GMAIL_APP_PASSWORD;
+  if (!user || !pass) return null;
+  if (!gmailTransporter) {
+    gmailTransporter = nodemailer.createTransport({ service: "gmail", auth: { user, pass } });
+  }
+  return gmailTransporter;
+}
+
+async function sendViaGmail(email, otp) {
+  const transporter = getGmailTransporter();
+  if (!transporter) return null; // GMAIL_USER/GMAIL_APP_PASSWORD belum diisi
+  try {
+    await transporter.sendMail({
+      from: `"BlackMamer AI" <${process.env.GMAIL_USER}>`,
+      to: email,
+      subject: `${otp} — Kode verifikasi BlackMamer AI`,
+      html: OTP_EMAIL_HTML(otp),
+    });
+    return { sent: true };
+  } catch (e) {
+    console.error("Gmail SMTP gagal:", e.message);
+    return { sent: false };
+  }
+}
+
+async function sendViaResend(email, otp) {
   const key = process.env.RESEND_API_KEY;
-  if (!key) return { sent: false }; // dev mode — caller falls back to devOtp
+  if (!key) return null; // RESEND_API_KEY belum diisi
   const from = process.env.RESEND_FROM || "BlackMamer AI <onboarding@resend.dev>";
   try {
     const r = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-      body: JSON.stringify({
-        from,
-        to: [email],
-        subject: `${otp} — Kode verifikasi BlackMamer AI`,
-        html: `<div style="font-family:sans-serif;background:#0a0a0a;color:#fff;padding:32px;border-radius:16px">
-          <p style="color:#fbbf24;letter-spacing:.2em;font-size:12px;margin:0 0 12px">BLACKMAMER AI</p>
-          <h2 style="margin:0 0 8px">Kode verifikasi kamu</h2>
-          <p style="color:#a3a3a3;margin:0 0 24px">Berlaku 5 menit. Jangan bagikan ke siapa pun.</p>
-          <div style="font-size:36px;font-weight:800;letter-spacing:.3em;color:#fbbf24">${otp}</div>
-        </div>`,
-      }),
+      body: JSON.stringify({ from, to: [email], subject: `${otp} — Kode verifikasi BlackMamer AI`, html: OTP_EMAIL_HTML(otp) }),
     });
     return { sent: r.ok };
   } catch (_) {
     return { sent: false };
   }
+}
+
+export async function sendOtpEmail(email, otp) {
+  // Prioritas: Gmail SMTP (gratis, ke siapa aja) -> Resend (kalau dikonfig) -> mode dev.
+  const viaGmail = await sendViaGmail(email, otp);
+  if (viaGmail) return viaGmail;
+  const viaResend = await sendViaResend(email, otp);
+  if (viaResend) return viaResend;
+  return { sent: false }; // dev mode — caller falls back to devOtp
 }
