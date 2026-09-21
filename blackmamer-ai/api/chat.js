@@ -613,6 +613,395 @@ async function generateImage(prompt) {
   };
 }
 
+/*
+ * =========================================================
+ * WEB SEARCH (Google Search grounding via Gemini native API)
+ * =========================================================
+ */
+
+const SEARCH_MODEL = "gemini-2.5-flash";
+const SEARCH_PROVIDER_URL = `https://generativelanguage.googleapis.com/v1beta/models/${SEARCH_MODEL}:generateContent`;
+
+function isWebSearchRequest(messages = []) {
+  const text = getLatestUserText(messages).toLowerCase();
+
+  if (!text) return false;
+
+  return [
+    "cari di internet",
+    "cari di google",
+    "cariin di internet",
+    "carikan di internet",
+    "search di internet",
+    "search web",
+    "searching",
+    "googling",
+    "berita terbaru",
+    "berita terkini",
+    "kabar terbaru",
+    "info terbaru",
+    "info terkini",
+    "update terbaru",
+    "terkini",
+    "harga terbaru",
+    "harga sekarang",
+    "harga saat ini",
+    "hari ini",
+    "sekarang ini",
+    "kurs hari ini",
+    "cuaca hari ini",
+    "jadwal hari ini",
+    "skor pertandingan",
+    "hasil pertandingan",
+    "siapa presiden",
+    "siapa ceo",
+    "versi terbaru",
+    "rilis terbaru",
+  ].some((keyword) => text.includes(keyword));
+}
+
+function buildSearchContents(messages) {
+  const cleaned = cleanMessages(messages);
+
+  return cleaned.map((m) => ({
+    role: m.role === "assistant" ? "model" : "user",
+    parts: [{ text: m.content }],
+  }));
+}
+
+async function searchWithGemini(messages) {
+  const key = process.env.GEMINI_API_KEY;
+
+  if (!key) {
+    return {
+      ok: false,
+      error:
+        "GEMINI_API_KEY belum dikonfigurasi, jadi web search belum bisa jalan.",
+    };
+  }
+
+  const contents = buildSearchContents(messages);
+
+  let response;
+
+  try {
+    response = await fetchWithTimeout(
+      SEARCH_PROVIDER_URL,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": key,
+        },
+        body: JSON.stringify({
+          contents,
+          system_instruction: {
+            parts: [{ text: SYSTEM_PROMPT }],
+          },
+          tools: [{ google_search: {} }],
+        }),
+      },
+      PROVIDER_TIMEOUT_MS
+    );
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      return {
+        ok: false,
+        error: "Search provider timeout.",
+      };
+    }
+
+    return {
+      ok: false,
+      error:
+        error?.message ||
+        "Gagal menghubungi search provider.",
+    };
+  }
+
+  const raw = await response.text();
+
+  if (!response.ok) {
+    return {
+      ok: false,
+      error: classifyProviderError(response.status, raw)
+        .message,
+    };
+  }
+
+  let data;
+
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    return {
+      ok: false,
+      error: "Response search provider bukan JSON valid.",
+    };
+  }
+
+  const candidate = data?.candidates?.[0];
+
+  const textParts = (candidate?.content?.parts || [])
+    .map((p) => p?.text || "")
+    .join("");
+
+  if (!textParts) {
+    return {
+      ok: false,
+      error: "Provider tidak mengembalikan jawaban.",
+    };
+  }
+
+  /*
+   * Ambil daftar sumber dari groundingMetadata kalau ada,
+   * biar user bisa cek sendiri linknya.
+   */
+  const chunks =
+    candidate?.groundingMetadata?.groundingChunks || [];
+
+  const sources = chunks
+    .map((c) => c?.web?.uri)
+    .filter(Boolean)
+    .slice(0, 5);
+
+  let content = textParts.trim();
+
+  if (sources.length) {
+    content +=
+      "\n\n**Sumber:**\n" +
+      sources.map((s) => `- ${s}`).join("\n");
+  }
+
+  return { ok: true, content };
+}
+
+/*
+ * =========================================================
+ * VISION (image understanding lewat Gemini multimodal)
+ * =========================================================
+ */
+
+const MAX_IMAGE_ATTACHMENTS = 3;
+const MAX_IMAGE_DATA_URL_CHARS = 6 * 1024 * 1024; // ~4.5MB gambar asli
+
+function extractImageAttachments(attachments) {
+  if (!Array.isArray(attachments)) return [];
+
+  return attachments
+    .filter(
+      (a) =>
+        typeof a?.dataUrl === "string" &&
+        a.dataUrl.startsWith("data:image/") &&
+        a.dataUrl.length <= MAX_IMAGE_DATA_URL_CHARS
+    )
+    .slice(0, MAX_IMAGE_ATTACHMENTS);
+}
+
+function attachImagesToMessages(providerMessages, images) {
+  if (!images.length) return providerMessages;
+
+  const msgs = providerMessages.map((m) => ({ ...m }));
+
+  let lastUserIndex = -1;
+
+  for (let i = msgs.length - 1; i >= 0; i--) {
+    if (msgs[i].role === "user") {
+      lastUserIndex = i;
+      break;
+    }
+  }
+
+  if (lastUserIndex < 0) return providerMessages;
+
+  const textContent = String(
+    msgs[lastUserIndex].content || ""
+  );
+
+  const parts = [{ type: "text", text: textContent }];
+
+  for (const img of images) {
+    parts.push({
+      type: "image_url",
+      image_url: { url: img.dataUrl },
+    });
+  }
+
+  msgs[lastUserIndex] = {
+    ...msgs[lastUserIndex],
+    content: parts,
+  };
+
+  return msgs;
+}
+
+/*
+ * =========================================================
+ * STREAMING (relay SSE dari provider ke client)
+ * =========================================================
+ */
+
+function sseWrite(res, event, data) {
+  res.write(`event: ${event}\n`);
+  res.write(`data: ${JSON.stringify(data)}\n\n`);
+}
+
+async function streamProviders({
+  res,
+  providers,
+  payload,
+  agent,
+  websiteRequest,
+}) {
+  const failures = [];
+
+  for (const provider of providers) {
+    if (!provider.key) {
+      failures.push({
+        provider: provider.id,
+        code: 0,
+        message: "API key belum dikonfigurasi.",
+      });
+      continue;
+    }
+
+    const providerPayload = {
+      ...payload,
+      model: provider.model,
+      stream: true,
+    };
+
+    let response;
+
+    try {
+      response = await fetchWithTimeout(
+        provider.url,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${provider.key}`,
+          },
+          body: JSON.stringify(providerPayload),
+        },
+        PROVIDER_TIMEOUT_MS
+      );
+    } catch (error) {
+      failures.push({
+        provider: provider.id,
+        code: error?.name === "AbortError" ? 408 : 0,
+        message:
+          error?.name === "AbortError"
+            ? "Provider timeout."
+            : error?.message ||
+              "Gagal menghubungi provider.",
+      });
+      continue;
+    }
+
+    if (!response.ok || !response.body) {
+      const raw = await response
+        .text()
+        .catch(() => "");
+
+      failures.push({
+        provider: provider.id,
+        code: response.status,
+        message: classifyProviderError(
+          response.status,
+          raw
+        ).message,
+      });
+      continue;
+    }
+
+    /*
+     * Status OK — mulai stream ke client. Dari titik ini
+     * kita GAK fallback ke provider lain lagi, soalnya
+     * client udah mulai nerima token.
+     */
+    sseWrite(res, "meta", {
+      provider: provider.id,
+      agent,
+      website: websiteRequest,
+    });
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+
+    let buffer = "";
+    let fullContent = "";
+    let finishReason = null;
+
+    while (true) {
+      const { value, done } = await reader.read();
+
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+
+        if (!trimmed.startsWith("data:")) continue;
+
+        const dataStr = trimmed.slice(5).trim();
+
+        if (dataStr === "[DONE]") continue;
+
+        let parsed;
+
+        try {
+          parsed = JSON.parse(dataStr);
+        } catch {
+          continue;
+        }
+
+        const delta =
+          parsed?.choices?.[0]?.delta?.content || "";
+
+        const reason =
+          parsed?.choices?.[0]?.finish_reason || null;
+
+        if (reason) finishReason = reason;
+
+        if (delta) {
+          fullContent += delta;
+          sseWrite(res, "delta", { text: delta });
+        }
+      }
+    }
+
+    if (finishReason === "length") {
+      const warning =
+        "\n\n⚠️ **Kode di atas kepotong** karena kepanjangan buat sekali generate. Balas \"lanjutin\" biar gue sambungin dari situ.";
+
+      sseWrite(res, "delta", { text: warning });
+    }
+
+    sseWrite(res, "done", {
+      provider: provider.id,
+      truncated: finishReason === "length",
+    });
+
+    return { ok: true };
+  }
+
+  /*
+   * Semua provider gagal SEBELUM sempat stream apapun.
+   */
+  sseWrite(res, "error", {
+    message:
+      "Semua provider yang tersedia gagal memproses request.",
+    failures,
+  });
+
+  return { ok: false, failures };
+}
+
 function getProviderOrder(agent) {
   const normalized = String(agent || "auto")
     .trim()
@@ -629,12 +1018,14 @@ function getProviderOrder(agent) {
    */
 
   const aliases = {
+    // BM Nexus (auto) ditangani terpisah di bawah.
     groq: ["groq", "nvidia", "gemini", "mistral", "openrouter"], // BM Velocity
     gemini: ["gemini", "groq", "mistral", "openrouter", "nvidia"], // BM Aurora
     mistral: ["mistral", "groq", "gemini", "openrouter", "nvidia"], // BM Forge
     nvidia: ["nvidia", "groq", "gemini", "openrouter", "mistral"], // BM Titan
     openrouter: ["openrouter", "groq", "gemini", "mistral", "nvidia"], // BM Core
 
+    // Tetap dukung key lama "bm xxx" kalau ada caller lain yang masih pakai.
     "bm nexus": ["groq", "gemini", "mistral", "openrouter"],
     "bm velocity": ["groq", "nvidia", "gemini", "mistral"],
     "bm aurora": ["gemini", "groq", "mistral", "openrouter"],
@@ -766,10 +1157,110 @@ export default async function handler(req, res) {
     }
 
     /*
-     * Deteksi image generation request.
-     * Ini dicek DULUAN, sebelum website/text provider,
-     * soalnya kalau user minta gambar/logo, kita gak mau
-     * malah balikin kode SVG dari text model.
+     * =====================================================
+     * 1) VISION — kalau ada attachment gambar (dataUrl),
+     *    prioritas paling tinggi. User yang attach gambar
+     *    jelas maunya AI liat gambarnya, bukan hal lain.
+     * =====================================================
+     */
+    const imageAttachments = extractImageAttachments(
+      attachments
+    );
+
+    if (imageAttachments.length) {
+      const geminiProvider = PROVIDERS.find(
+        (p) => p.id === "gemini"
+      );
+
+      if (!geminiProvider?.key) {
+        return json(res, 502, {
+          ok: false,
+          error:
+            "GEMINI_API_KEY belum dikonfigurasi, jadi AI belum bisa liat gambar.",
+          vision: true,
+        });
+      }
+
+      const baseMessages = buildMessages({
+        messages,
+        artifactContext,
+        attachments,
+      });
+
+      const visionMessages = attachImagesToMessages(
+        baseMessages,
+        imageAttachments
+      );
+
+      const visionResult = await callProvider(
+        geminiProvider,
+        {
+          model: geminiProvider.model,
+          messages: visionMessages,
+          max_tokens: 2048,
+          temperature: 0.6,
+        }
+      );
+
+      if (visionResult.ok) {
+        return json(res, 200, {
+          ok: true,
+          content: visionResult.content,
+          provider: "gemini-vision",
+          agent,
+          website: false,
+          vision: true,
+        });
+      }
+
+      return json(res, 502, {
+        ok: false,
+        error: `Gagal menganalisa gambar: ${
+          visionResult.error?.message ||
+          "Unknown error."
+        }`,
+        vision: true,
+      });
+    }
+
+    /*
+     * =====================================================
+     * 2) WEB SEARCH — pertanyaan yang butuh info terkini
+     *    (harga, berita, jadwal, dll) di-ground pake
+     *    Google Search asli lewat Gemini, bukan ditebak
+     *    dari training data yang udah basi.
+     * =====================================================
+     */
+    const webSearchRequest = isWebSearchRequest(messages);
+
+    if (webSearchRequest) {
+      const searchResult = await searchWithGemini(messages);
+
+      if (searchResult.ok) {
+        return json(res, 200, {
+          ok: true,
+          content: searchResult.content,
+          provider: "gemini-search",
+          agent,
+          website: false,
+          search: true,
+        });
+      }
+
+      return json(res, 502, {
+        ok: false,
+        error: `Gagal web search: ${searchResult.error}`,
+        search: true,
+      });
+    }
+
+    /*
+     * =====================================================
+     * 3) IMAGE GENERATION
+     *    Ini dicek sebelum website/text provider, soalnya
+     *    kalau user minta gambar/logo, kita gak mau malah
+     *    balikin kode SVG dari text model.
+     * =====================================================
      */
     const imageRequest = isImageRequest(messages);
 
@@ -799,7 +1290,13 @@ export default async function handler(req, res) {
     }
 
     /*
-     * Deteksi website request.
+     * =====================================================
+     * 4) WEBSITE / CHAT BIASA lewat text provider chain.
+     *    Kalau body.stream === true, jawaban di-relay
+     *    token-by-token pake SSE. Kalau enggak, tetap
+     *    balikin JSON penuh kayak sebelumnya (backward
+     *    compatible buat caller lama).
+     * =====================================================
      */
     const websiteRequest =
       isWebsiteRequest(messages);
@@ -824,7 +1321,7 @@ export default async function handler(req, res) {
      * provider di PROVIDERS).
      */
     const maxTokens = websiteRequest
-      ? 999999
+      ? 8192
       : 2048;
 
     const payload = {
@@ -858,6 +1355,32 @@ export default async function handler(req, res) {
     const providers =
       getProvidersByOrder(agent);
 
+    /*
+     * --- MODE STREAMING ---
+     */
+    if (body.stream === true) {
+      res.writeHead(200, {
+        "Content-Type": "text/event-stream; charset=utf-8",
+        "Cache-Control": "no-cache, no-transform",
+        Connection: "keep-alive",
+        "X-Accel-Buffering": "no",
+      });
+
+      await streamProviders({
+        res,
+        providers,
+        payload,
+        agent,
+        websiteRequest,
+      });
+
+      res.end();
+      return;
+    }
+
+    /*
+     * --- MODE NON-STREAMING (default, backward compatible) ---
+     */
     const failures = [];
 
     for (const provider of providers) {
