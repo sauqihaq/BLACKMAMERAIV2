@@ -1,83 +1,776 @@
-// api/chat.js — Vercel Function
-import { getSession } from "../lib/session.js";
+import { Redis } from "@upstash/redis";
+
+const redis = Redis.fromEnv();
+
+const MAX_HISTORY = 8;
+const MAX_USER_CHARS = 5000;
+const MAX_ASSISTANT_CHARS = 2200;
+const MAX_CURRENT_CHARS = 9000;
+const MAX_ARTIFACT_CHARS = 9000;
+
+const MAX_ATTACHMENTS = 6;
+const MAX_ATTACHMENT_TEXT = 6000;
+
+const PROVIDER_TIMEOUT_MS = 20000;
+const MAX_REQUEST_BYTES = 120000;
 
 const PROVIDERS = [
-  { id:"groq", label:"Groq", url:"https://api.groq.com/openai/v1/chat/completions", key:process.env.GROQ_API_KEY, model:"openai/gpt-oss-120b" },
-  { id:"gemini", label:"Gemini", url:"https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", key:process.env.GEMINI_API_KEY, model:"gemini-2.5-flash" },
-  { id:"mistral", label:"Mistral", url:"https://api.mistral.ai/v1/chat/completions", key:process.env.MISTRAL_API_KEY, model:"mistral-small-latest" },
-  { id:"nvidia", label:"NVIDIA", url:"https://integrate.api.nvidia.com/v1/chat/completions", key:process.env.NVIDIA_API_KEY, model:"openai/gpt-oss-120b" },
-  { id:"openrouter", label:"OpenRouter", url:"https://openrouter.ai/api/v1/chat/completions", key:process.env.OPENROUTER_API_KEY, model:"openai/gpt-oss-20b:free" },
+  {
+    id: "groq",
+    url: "https://api.groq.com/openai/v1/chat/completions",
+    key: process.env.GROQ_API_KEY,
+    model: "openai/gpt-oss-120b",
+  },
+  {
+    id: "gemini",
+    url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+    key: process.env.GEMINI_API_KEY,
+    model: "gemini-2.5-flash",
+  },
+  {
+    id: "mistral",
+    url: "https://api.mistral.ai/v1/chat/completions",
+    key: process.env.MISTRAL_API_KEY,
+    model: "mistral-small-latest",
+  },
+  {
+    id: "nvidia",
+    url: "https://integrate.api.nvidia.com/v1/chat/completions",
+    key: process.env.NVIDIA_API_KEY,
+    model: "openai/gpt-oss-120b",
+  },
+  {
+    id: "openrouter",
+    url: "https://openrouter.ai/api/v1/chat/completions",
+    key: process.env.OPENROUTER_API_KEY,
+    model: "openai/gpt-oss-20b:free",
+  },
 ];
 
-const SYSTEM_PROMPT = `Kamu adalah BlackMamer AI.
+const SYSTEM_PROMPT = `
+You are BlackMamer AI.
+
+You are a general-purpose AI assistant built for BlackMamer Studio.
 
 PERSONALITY:
-- Ngobrol seperti teman yang enak diajak bicara, bukan customer service.
-- Kalau user pakai Indonesia/slang, balas Indonesia yang santai dan natural. Boleh memakai "lu/gue" jika konteksnya cocok.
-- Jangan memaksakan slang di setiap kalimat. Tetap jelas dan hormat.
-- Kalau user curhat, dengarkan dulu, validasi seperlunya, lalu bantu. Jangan langsung menggurui atau mengubah semua curhat menjadi daftar langkah.
-- Kalau user minta solusi teknis, langsung bantu secara konkret.
-- Jangan mengarang fakta, hasil tool, file, preview, atau kemampuan yang sebenarnya tidak tersedia.
+- Speak naturally and casually.
+- The user is Indonesian.
+- You may use "lu", "gue", "lo", "bro", etc. when appropriate.
+- Do not sound robotic.
+- Be helpful, direct, and practical.
+- If the user is casually talking or venting, respond like a supportive friend.
+- Do not over-explain simple things.
 
-CODING:
-- Kalau diminta kode, berikan kode lengkap yang siap dipakai bila memungkinkan.
-- Jangan memotong bagian penting dengan "...".
-- Jelaskan perubahan secara singkat setelah kode.
-- Pertahankan API, nama endpoint, struktur project, dan kontrak existing kecuali user memang meminta perubahan.
+IMPORTANT:
+- Never mention the underlying provider, API provider, model provider, or internal routing unless the user explicitly asks about the technical implementation.
+- The user-facing model names are BlackMamer AI models such as BM Nexus, BM Velocity, BM Aurora, BM Forge, BM Titan, and BM Core.
+- Do not call yourself Groq, Gemini, Mistral, NVIDIA, OpenRouter, etc.
 
-WEBSITE / UI ANTI-SLOP:
-Saat membuat atau mengubah website/UI, ikuti prinsip anti-slop dari miqdadbadjuber/anti-slop: hasil harus terasa dirancang untuk kebutuhan produk, bukan template AI generik.
-- Setiap dekorasi, gradient, glass, badge, animasi, atau card harus punya alasan UX yang jelas.
-- Jangan membuat fake stats, fake testimonials, fake activity, fake notifications, fake dashboards, atau angka yang tidak berasal dari data.
-- Jangan membuat tombol yang hanya terlihat hidup; setiap interactive element harus punya aksi atau tujuan nyata.
-- Sediakan state yang relevan: loading, empty, error, disabled, success bila diperlukan.
-- Prioritaskan hierarchy, spacing, readability, keyboard/focus, responsive behavior, dan touch targets.
-- Hindari copy generik seperti "Revolutionize your workflow" tanpa konteks produk.
-- Jangan menambahkan fitur hanya untuk memenuhi pola UI AI.
-- Untuk website yang diminta user, hasilkan single-file HTML lengkap bila itu yang paling mudah dipreview oleh frontend.
-- Jika menghasilkan website, gunakan fenced code block \`\`\`html ... \`\`\` agar BlackMamer AI dapat menampilkan preview dan source code berdampingan.
-- Jangan mengklaim telah menjalankan atau menguji website jika memang belum dijalankan.
+PROGRAMMING:
+- Give complete working code when the user asks for code.
+- Preserve existing architecture when modifying an existing project.
+- Do not remove existing functionality unless requested.
+- When debugging, identify the actual cause before proposing the fix.
+- Prefer copy-paste-ready solutions.
 
-IMAGE:
-- Jika tidak ada image-generation tool/provider yang tersedia, jangan berpura-pura sudah membuat gambar. Bantu dengan prompt atau konsep dan jelaskan keterbatasannya secara singkat.`;
+WEBSITE CREATION:
+When the user asks you to create a website:
+- Actually generate the website.
+- Prefer a complete single-file HTML document unless the user explicitly asks for multiple files.
+- Include HTML, CSS, and JavaScript in the same file.
+- Make it polished and production-oriented.
+- Responsive for desktop and mobile.
+- Avoid generic AI-looking layouts.
+- Avoid unnecessary gradients, excessive glassmorphism, giant empty areas, excessive rounded cards, and repetitive card grids.
+- Use deliberate typography, spacing, hierarchy, and interaction design.
+- Do not add fake statistics, fake testimonials, fake reviews, or fake company claims unless the user explicitly requests placeholder content.
+- Do not put huge amounts of unnecessary comments in generated code.
+- Keep generated websites reasonably compact so they can be revised in later messages.
 
-const MAX_MESSAGES=20, MAX_CHARS=8000, MAX_ATTACHMENTS=8, MAX_ATTACHMENT_TEXT=12000, PROVIDER_TIMEOUT_MS=14000;
-const hits=new Map(), WINDOW_MS=60000, MAX_PER_WINDOW=20;
-function limited(ip){const now=Date.now();const recent=(hits.get(ip)||[]).filter(t=>now-t<WINDOW_MS);recent.push(now);hits.set(ip,recent);if(hits.size>5000)hits.clear();return recent.length>MAX_PER_WINDOW}
-function cleanMessages(input){if(!Array.isArray(input))return null;const out=[];for(const m of input.slice(-MAX_MESSAGES)){if(!m||(m.role!=="user"&&m.role!=="assistant"))continue;if(typeof m.content!=="string"||!m.content.trim())continue;out.push({role:m.role,content:m.content.slice(0,MAX_CHARS)})}if(!out.length||out[out.length-1].role!=="user")return null;return out}
-function cleanAttachments(input){if(!Array.isArray(input))return [];return input.slice(0,MAX_ATTACHMENTS).map(a=>({name:String(a?.name||"file").slice(0,180),type:String(a?.type||"application/octet-stream").slice(0,120),size:Number.isFinite(Number(a?.size))?Number(a.size):0,text:typeof a?.text==="string"?a.text.slice(0,MAX_ATTACHMENT_TEXT):""})).filter(a=>a.name)}
+WEBSITE REVISIONS:
+If an ARTIFACT TERAKHIR is supplied, treat it as the current source code of the website.
+When the user asks for changes:
+- Modify the existing artifact instead of creating an unrelated website.
+- Preserve existing functionality unless the requested change requires otherwise.
+- Return the complete updated website when practical.
 
-export default async function handler(req,res){
-  if(req.method!=="POST")return res.status(405).json({error:"Metode tidak diizinkan."});
-  if(!getSession(req))return res.status(401).json({error:"Sesi tidak valid. Silakan login lagi."});
-  const ip=String(req.headers["x-forwarded-for"]||"unknown").split(",")[0].trim();
-  if(limited(ip))return res.status(429).json({error:"Terlalu banyak pesan. Tunggu semenit lalu coba lagi."});
-  const messages=cleanMessages(req.body?.messages);
-  if(!messages)return res.status(400).json({error:"Pesan kosong atau formatnya salah."});
-  const attachments=cleanAttachments(req.body?.attachments);
-  const active=PROVIDERS.filter(p=>p.key);
-  if(!active.length)return res.status(500).json({error:"Belum ada API key. Isi minimal satu key di Environment Variables Vercel."});
-  const requestedAgent=String(req.body?.agent||"auto").toLowerCase();
-  let queue=active,forcedOnly=false;
-  if(requestedAgent!=="auto"){
-    const forced=active.find(p=>p.id===requestedAgent);
-    if(!forced)return res.status(400).json({error:`Agent "${requestedAgent}" tidak tersedia (key belum diisi atau nama salah).`});
-    queue=[forced];forcedOnly=true;
+OUTPUT:
+- When generating a website, place the complete HTML inside a fenced \`\`\`html code block.
+- Do not put the HTML outside the code block.
+`;
+
+function json(res, status, data) {
+  res.status(status).json(data);
+}
+
+function safeString(value, max = 10000) {
+  if (value == null) return "";
+  return String(value).slice(0, max);
+}
+
+function isWebsiteRequest(messages = []) {
+  const latest = [...messages]
+    .reverse()
+    .find((m) => m?.role === "user");
+
+  const text = String(latest?.content || "").toLowerCase();
+
+  return [
+    "buat website",
+    "bikin website",
+    "buatkan website",
+    "bikinin website",
+    "create website",
+    "build website",
+    "website",
+    "landing page",
+    "web app",
+    "web aplikasi",
+    "website html",
+    "html css js",
+  ].some((keyword) => text.includes(keyword));
+}
+
+function cleanMessages(messages) {
+  if (!Array.isArray(messages)) return [];
+
+  const recent = messages.slice(-MAX_HISTORY);
+
+  return recent
+    .filter((m) => {
+      return (
+        m &&
+        (m.role === "user" ||
+          m.role === "assistant" ||
+          m.role === "system") &&
+        typeof m.content === "string"
+      );
+    })
+    .map((m) => {
+      let content = m.content || "";
+
+      /*
+       * Jangan kirim ulang full website hasil AI ke provider.
+       * Ini penyebab utama request membengkak ketika user
+       * meminta revisi website berkali-kali.
+       */
+      if (
+        m.role === "assistant" &&
+        /```(?:html|html5)[\s\S]*```/i.test(content)
+      ) {
+        content =
+          "[WEBSITE ARTIFACT — source disimpan terpisah di ARTIFACT TERAKHIR.]";
+      } else if (m.role === "assistant") {
+        content = content.slice(0, MAX_ASSISTANT_CHARS);
+      } else if (m.role === "user") {
+        content = content.slice(0, MAX_USER_CHARS);
+      } else {
+        content = content.slice(0, MAX_CURRENT_CHARS);
+      }
+
+      return {
+        role: m.role,
+        content,
+      };
+    });
+}
+
+function buildAttachmentContext(attachments) {
+  if (!Array.isArray(attachments)) return "";
+
+  const usable = attachments
+    .slice(0, MAX_ATTACHMENTS)
+    .map((a) => {
+      const name = safeString(a?.name, 200);
+      const type = safeString(a?.type, 120);
+      const size = Number(a?.size || 0);
+
+      const text = safeString(a?.text, MAX_ATTACHMENT_TEXT);
+
+      let block =
+        `FILE: ${name}\n` +
+        `TYPE: ${type}\n` +
+        `SIZE: ${size} bytes`;
+
+      if (text) {
+        block += `\nCONTENT:\n${text}`;
+      }
+
+      return block;
+    })
+    .filter(Boolean);
+
+  if (!usable.length) return "";
+
+  return (
+    "\n\nATTACHMENTS:\n" +
+    usable.join("\n\n--------------------\n\n")
+  );
+}
+
+function buildMessages({
+  messages,
+  artifactContext,
+  attachments,
+}) {
+  const cleaned = cleanMessages(messages);
+
+  const result = cleaned.map((m) => ({
+    role: m.role,
+    content: m.content,
+  }));
+
+  /*
+   * Artifact website dikirim TERPISAH dari history.
+   * Jadi history tetap kecil.
+   */
+  const artifact = safeString(
+    artifactContext,
+    MAX_ARTIFACT_CHARS
+  );
+
+  const attachmentContext = buildAttachmentContext(attachments);
+
+  if (artifact || attachmentContext) {
+    let extra = "";
+
+    if (artifact) {
+      extra +=
+        "\n\nARTIFACT TERAKHIR (SOURCE WEBSITE):\n" +
+        artifact;
+    }
+
+    if (attachmentContext) {
+      extra += attachmentContext;
+    }
+
+    /*
+     * Tempel context tambahan ke pesan user terakhir.
+     */
+    let lastUserIndex = -1;
+
+    for (let i = result.length - 1; i >= 0; i--) {
+      if (result[i].role === "user") {
+        lastUserIndex = i;
+        break;
+      }
+    }
+
+    if (lastUserIndex >= 0) {
+      result[lastUserIndex] = {
+        ...result[lastUserIndex],
+        content:
+          String(result[lastUserIndex].content || "").slice(
+            0,
+            MAX_CURRENT_CHARS
+          ) + extra.slice(0, MAX_CURRENT_CHARS),
+      };
+    } else {
+      result.push({
+        role: "user",
+        content: extra.slice(0, MAX_CURRENT_CHARS),
+      });
+    }
   }
 
-  const attachmentContext=attachments.length?`\n\nLAMPIRAN DARI USER (konteks lokal frontend):\n${attachments.map((a,i)=>`[${i+1}] ${a.name} — ${a.type} — ${a.size} bytes${a.text?`\nIsi teks:\n${a.text}`:"\nFile ini hanya memiliki metadata/nama; jangan mengaku sudah membaca isi binary/gambar."}`).join("\n\n")}`:"";
-  const payload=[{role:"system",content:SYSTEM_PROMPT},...messages];
-  if(attachmentContext)payload[payload.length-1]={...payload[payload.length-1],content:payload[payload.length-1].content+attachmentContext};
-  const failures=[];
-  for(const p of queue){
-    try{
-      const r=await fetch(p.url,{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${p.key}`},body:JSON.stringify({model:p.model,messages:payload,max_tokens:4096}),signal:AbortSignal.timeout(PROVIDER_TIMEOUT_MS)});
-      if(!r.ok){failures.push(`${p.id}:${r.status}`);continue}
-      const data=await r.json();const reply=data?.choices?.[0]?.message?.content;
-      if(typeof reply!=="string"||!reply.trim()){failures.push(`${p.id}:kosong`);continue}
-      return res.status(200).json({reply,provider:p.id});
-    }catch(e){failures.push(`${p.id}:${e.name==="TimeoutError"?"timeout":"error"}`)}
+  return [
+    {
+      role: "system",
+      content: SYSTEM_PROMPT,
+    },
+    ...result,
+  ];
+}
+
+function classifyProviderError(status, body) {
+  const text = String(body || "").slice(0, 1000);
+
+  if (status === 413) {
+    return {
+      code: 413,
+      message:
+        "Request terlalu besar untuk provider.",
+    };
   }
-  console.error("Semua provider gagal:",failures.join(", "));
-  return res.status(503).json({error:forcedOnly?"Agent yang lu pilih lagi bermasalah. Coba agent lain atau Auto.":"Semua model lagi penuh atau lambat. Coba kirim ulang sebentar lagi."});
+
+  if (status === 429) {
+    return {
+      code: 429,
+      message:
+        "Provider sedang kena rate limit.",
+    };
+  }
+
+  if (status === 401) {
+    return {
+      code: 401,
+      message:
+        "API key provider tidak valid atau belum terpasang.",
+    };
+  }
+
+  if (status === 403) {
+    return {
+      code: 403,
+      message:
+        "Request ditolak oleh provider.",
+    };
+  }
+
+  if (status === 400) {
+    return {
+      code: 400,
+      message:
+        "Provider menolak format request.",
+    };
+  }
+
+  if (status >= 500) {
+    return {
+      code: status,
+      message:
+        "Provider sedang mengalami error server.",
+    };
+  }
+
+  return {
+    code: status,
+    message:
+      text || `Provider error HTTP ${status}.`,
+  };
+}
+
+async function fetchWithTimeout(url, options, timeoutMs) {
+  const controller = new AbortController();
+
+  const timer = setTimeout(() => {
+    controller.abort();
+  }, timeoutMs);
+
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function callProvider(provider, payload) {
+  if (!provider.key) {
+    return {
+      ok: false,
+      provider: provider.id,
+      error: {
+        code: 0,
+        message: "API key belum dikonfigurasi.",
+      },
+    };
+  }
+
+  let response;
+
+  try {
+    response = await fetchWithTimeout(
+      provider.url,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${provider.key}`,
+        },
+        body: JSON.stringify(payload),
+      },
+      PROVIDER_TIMEOUT_MS
+    );
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      return {
+        ok: false,
+        provider: provider.id,
+        error: {
+          code: 408,
+          message: "Provider timeout.",
+        },
+      };
+    }
+
+    return {
+      ok: false,
+      provider: provider.id,
+      error: {
+        code: 0,
+        message:
+          error?.message || "Gagal menghubungi provider.",
+      },
+    };
+  }
+
+  const raw = await response.text();
+
+  if (!response.ok) {
+    return {
+      ok: false,
+      provider: provider.id,
+      error: classifyProviderError(
+        response.status,
+        raw
+      ),
+    };
+  }
+
+  let data;
+
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    return {
+      ok: false,
+      provider: provider.id,
+      error: {
+        code: 502,
+        message: "Response provider bukan JSON valid.",
+      },
+    };
+  }
+
+  const content =
+    data?.choices?.[0]?.message?.content ??
+    data?.choices?.[0]?.text ??
+    "";
+
+  if (!content) {
+    return {
+      ok: false,
+      provider: provider.id,
+      error: {
+        code: 502,
+        message:
+          "Provider tidak mengembalikan content.",
+      },
+    };
+  }
+
+  return {
+    ok: true,
+    provider: provider.id,
+    content: String(content),
+    raw: data,
+  };
+}
+
+function getProviderOrder(agent) {
+  const normalized = String(agent || "auto")
+    .trim()
+    .toLowerCase();
+
+  /*
+   * User melihat nama model BlackMamer.
+   * Backend yang menentukan provider sebenarnya.
+   */
+
+  const aliases = {
+    "bm nexus": ["groq", "gemini", "mistral", "openrouter"],
+    "bm velocity": ["groq", "nvidia", "gemini", "mistral"],
+    "bm aurora": ["gemini", "groq", "mistral", "openrouter"],
+    "bm forge": ["mistral", "groq", "gemini", "openrouter"],
+    "bm titan": ["nvidia", "groq", "gemini", "openrouter"],
+    "bm core": ["openrouter", "groq", "gemini", "mistral"],
+  };
+
+  if (normalized === "auto") {
+    return [
+      "groq",
+      "gemini",
+      "mistral",
+      "nvidia",
+      "openrouter",
+    ];
+  }
+
+  if (aliases[normalized]) {
+    return aliases[normalized];
+  }
+
+  if (
+    [
+      "groq",
+      "gemini",
+      "mistral",
+      "nvidia",
+      "openrouter",
+    ].includes(normalized)
+  ) {
+    return [normalized];
+  }
+
+  return [
+    "groq",
+    "gemini",
+    "mistral",
+    "nvidia",
+    "openrouter",
+  ];
+}
+
+function getProvidersByOrder(agent) {
+  const order = getProviderOrder(agent);
+
+  const result = [];
+
+  for (const id of order) {
+    const provider = PROVIDERS.find(
+      (p) => p.id === id
+    );
+
+    if (provider) result.push(provider);
+  }
+
+  return result;
+}
+
+function getClientIp(req) {
+  const forwarded =
+    req.headers["x-forwarded-for"];
+
+  if (forwarded) {
+    return String(forwarded)
+      .split(",")[0]
+      .trim();
+  }
+
+  return (
+    req.headers["x-real-ip"] ||
+    req.socket?.remoteAddress ||
+    "unknown"
+  );
+}
+
+async function checkRateLimit(ip) {
+  /*
+   * Redis rate limit sederhana.
+   *
+   * Kalau Redis belum tersedia, jangan bikin seluruh
+   * endpoint mati hanya karena rate-limit storage.
+   */
+  try {
+    const key = `bm-rate:${ip}`;
+
+    const current = await redis.incr(key);
+
+    if (current === 1) {
+      await redis.expire(key, 60);
+    }
+
+    /*
+     * Batas internal request per menit.
+     */
+    if (current > 20) {
+      return false;
+    }
+
+    return true;
+  } catch {
+    return true;
+  }
+}
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return json(res, 405, {
+      error: "Method Not Allowed",
+    });
+  }
+
+  try {
+    const ip = getClientIp(req);
+
+    const allowed = await checkRateLimit(ip);
+
+    if (!allowed) {
+      return json(res, 429, {
+        error:
+          "Terlalu banyak request. Coba lagi sebentar.",
+      });
+    }
+
+    const body =
+      typeof req.body === "string"
+        ? JSON.parse(req.body)
+        : req.body || {};
+
+    const {
+      messages = [],
+      agent = "auto",
+      attachments = [],
+      artifactContext = "",
+    } = body;
+
+    if (!Array.isArray(messages)) {
+      return json(res, 400, {
+        error: "messages harus berupa array.",
+      });
+    }
+
+    /*
+     * Deteksi website request.
+     */
+    const websiteRequest =
+      isWebsiteRequest(messages);
+
+    /*
+     * Build payload yang sudah dipangkas.
+     */
+    const providerMessages = buildMessages({
+      messages,
+      artifactContext,
+      attachments,
+    });
+
+    /*
+     * Untuk website kita beri output lebih panjang.
+     * Request biasa tetap lebih hemat.
+     */
+    const maxTokens = websiteRequest
+      ? 4096
+      : 2048;
+
+    const payload = {
+      model: "",
+      messages: providerMessages,
+      max_tokens: maxTokens,
+      temperature: websiteRequest
+        ? 0.65
+        : 0.7,
+    };
+
+    const serialized = JSON.stringify(payload);
+
+    const requestBytes = new TextEncoder().encode(
+      serialized
+    ).length;
+
+    /*
+     * Safety guard:
+     * jangan pernah mengirim payload raksasa ke provider.
+     */
+    if (requestBytes > MAX_REQUEST_BYTES) {
+      return json(res, 413, {
+        error:
+          "Request website terlalu besar sebelum dikirim ke provider. Context sudah melebihi batas aman.",
+        requestBytes,
+        maxBytes: MAX_REQUEST_BYTES,
+      });
+    }
+
+    const providers =
+      getProvidersByOrder(agent);
+
+    const failures = [];
+
+    for (const provider of providers) {
+      const providerPayload = {
+        ...payload,
+        model: provider.model,
+      };
+
+      const result = await callProvider(
+        provider,
+        providerPayload
+      );
+
+      if (result.ok) {
+        return json(res, 200, {
+          ok: true,
+          content: result.content,
+          provider: result.provider,
+          agent,
+          website: websiteRequest,
+        });
+      }
+
+      failures.push({
+        provider: result.provider,
+        code: result.error?.code || 0,
+        message:
+          result.error?.message ||
+          "Unknown provider error.",
+      });
+    }
+
+    /*
+     * Kalau semua provider gagal, tampilkan penyebab
+     * yang sebenarnya. Jangan lagi kasih error generic
+     * "semua model penuh".
+     */
+    const has413 = failures.some(
+      (x) => x.code === 413
+    );
+
+    const has429 = failures.some(
+      (x) => x.code === 429
+    );
+
+    const has401 = failures.some(
+      (x) => x.code === 401
+    );
+
+    let userMessage =
+      "Semua provider yang tersedia gagal memproses request.";
+
+    if (has413) {
+      userMessage =
+        "Request website ini terlalu besar untuk dikirim ke provider. Gue sudah membatasi context otomatis; coba kirim ulang atau minta versi website yang lebih ringkas.";
+    } else if (has429) {
+      userMessage =
+        "Provider sedang kena rate limit. Coba agent lain atau tunggu sebentar lalu kirim lagi.";
+    } else if (has401) {
+      userMessage =
+        "API key provider belum valid atau belum terpasang. Cek environment variables di deployment lu.";
+    }
+
+    /*
+     * Kalau user memilih agent tertentu,
+     * tampilkan detail error untuk debugging.
+     */
+    const selectedAgent =
+      String(agent || "auto").toLowerCase();
+
+    const isForcedAgent =
+      selectedAgent !== "auto";
+
+    if (isForcedAgent) {
+      const details = failures
+        .map(
+          (f) =>
+            `${f.provider}: HTTP ${
+              f.code || "ERR"
+            } — ${f.message}`
+        )
+        .join(" | ");
+
+      userMessage += ` Detail: ${details}`;
+    }
+
+    return json(res, 502, {
+      ok: false,
+      error: userMessage,
+      website: websiteRequest,
+      requestBytes,
+      failures,
+    });
+  } catch (error) {
+    console.error(
+      "[BLACKMAMER AI ERROR]",
+      error
+    );
+
+    return json(res, 500, {
+      ok: false,
+      error:
+        error?.message ||
+        "Internal server error.",
+    });
+  }
 }
