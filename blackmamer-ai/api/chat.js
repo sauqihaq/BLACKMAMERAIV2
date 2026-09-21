@@ -25,7 +25,7 @@ const PROVIDERS = [
     id: "gemini",
     url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
     key: process.env.GEMINI_API_KEY,
-    model: "gemini-3.6-flash",
+    model: "gemini-3.8-flash",
   },
   {
     id: "mistral",
