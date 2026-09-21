@@ -466,11 +466,22 @@ function getProviderOrder(agent) {
     .toLowerCase();
 
   /*
-   * User melihat nama model BlackMamer.
-   * Backend yang menentukan provider sebenarnya.
+   * User melihat nama model BlackMamer di UI, tapi ID yang
+   * dikirim frontend adalah ID provider langsung (groq, gemini,
+   * mistral, nvidia, openrouter) — lihat AGENTS[] di index.html.
+   *
+   * Jadi mapping fallback chain harus dikunci ke ID tersebut,
+   * BUKAN ke label "bm xxx" (yang gak pernah dikirim frontend
+   * dan bikin fallback ini mati / gak kepakai sama sekali).
    */
 
   const aliases = {
+    groq: ["groq", "nvidia", "gemini", "mistral", "openrouter"], // BM Velocity
+    gemini: ["gemini", "groq", "mistral", "openrouter", "nvidia"], // BM Aurora
+    mistral: ["mistral", "groq", "gemini", "openrouter", "nvidia"], // BM Forge
+    nvidia: ["nvidia", "groq", "gemini", "openrouter", "mistral"], // BM Titan
+    openrouter: ["openrouter", "groq", "gemini", "mistral", "nvidia"], // BM Core
+
     "bm nexus": ["groq", "gemini", "mistral", "openrouter"],
     "bm velocity": ["groq", "nvidia", "gemini", "mistral"],
     "bm aurora": ["gemini", "groq", "mistral", "openrouter"],
@@ -491,18 +502,6 @@ function getProviderOrder(agent) {
 
   if (aliases[normalized]) {
     return aliases[normalized];
-  }
-
-  if (
-    [
-      "groq",
-      "gemini",
-      "mistral",
-      "nvidia",
-      "openrouter",
-    ].includes(normalized)
-  ) {
-    return [normalized];
   }
 
   return [
