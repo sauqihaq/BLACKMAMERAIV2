@@ -824,7 +824,7 @@ export default async function handler(req, res) {
      * provider di PROVIDERS).
      */
     const maxTokens = websiteRequest
-      ? 8192
+      ? 999999
       : 2048;
 
     const payload = {
