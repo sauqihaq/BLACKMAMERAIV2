@@ -94,6 +94,13 @@ When the user asks for changes:
 - Preserve existing functionality unless the requested change requires otherwise.
 - Return the complete updated website when practical.
 
+WEBSITE CONTINUATION:
+If the user says something like "lanjutin", "lanjut", "terusin", or "continue" right after a website reply that was cut off mid-code:
+- The ARTIFACT TERAKHIR is INCOMPLETE, not a finished website to revise.
+- Continue writing exactly from where it stopped. Do not repeat code that was already shown.
+- Do not restart the file or regenerate parts already provided.
+- Keep the same fenced \`\`\`html code block convention for the continuation.
+
 OUTPUT:
 - When generating a website, place the complete HTML inside a fenced \`\`\`html code block.
 - Do not put the HTML outside the code block.
@@ -128,6 +135,52 @@ function isWebsiteRequest(messages = []) {
     "web aplikasi",
     "website html",
     "html css js",
+  ].some((keyword) => text.includes(keyword));
+}
+
+function getLatestUserText(messages = []) {
+  const latest = [...messages]
+    .reverse()
+    .find((m) => m?.role === "user");
+
+  return String(latest?.content || "").trim();
+}
+
+function isImageRequest(messages = []) {
+  const text = getLatestUserText(messages).toLowerCase();
+
+  if (!text) return false;
+
+  return [
+    "buat logo",
+    "buatkan logo",
+    "bikin logo",
+    "bikinin logo",
+    "generate logo",
+    "buat gambar",
+    "buatkan gambar",
+    "bikin gambar",
+    "bikinin gambar",
+    "generate gambar",
+    "generate image",
+    "create image",
+    "create a logo",
+    "create logo",
+    "gambarkan",
+    "gambar dong",
+    "buat foto",
+    "bikin foto",
+    "buatkan foto",
+    "buat ilustrasi",
+    "bikin ilustrasi",
+    "buat icon",
+    "bikin icon",
+    "buat banner",
+    "bikin banner",
+    "buat thumbnail",
+    "bikin thumbnail",
+    "buat poster",
+    "bikin poster",
   ].some((keyword) => text.includes(keyword));
 }
 
@@ -452,11 +505,111 @@ async function callProvider(provider, payload) {
     };
   }
 
+  const finishReason =
+    data?.choices?.[0]?.finish_reason ||
+    data?.choices?.[0]?.finishReason ||
+    null;
+
   return {
     ok: true,
     provider: provider.id,
     content: String(content),
+    finishReason,
     raw: data,
+  };
+}
+
+const IMAGE_MODEL = "gemini-2.5-flash-image";
+const IMAGE_PROVIDER_URL = `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_MODEL}:generateContent`;
+
+async function generateImage(prompt) {
+  const key = process.env.GEMINI_API_KEY;
+
+  if (!key) {
+    return {
+      ok: false,
+      error:
+        "GEMINI_API_KEY belum dikonfigurasi, jadi generate gambar belum bisa jalan.",
+    };
+  }
+
+  let response;
+
+  try {
+    response = await fetchWithTimeout(
+      IMAGE_PROVIDER_URL,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": key,
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: prompt }],
+            },
+          ],
+        }),
+      },
+      PROVIDER_TIMEOUT_MS
+    );
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      return {
+        ok: false,
+        error: "Image provider timeout.",
+      };
+    }
+
+    return {
+      ok: false,
+      error:
+        error?.message ||
+        "Gagal menghubungi image provider.",
+    };
+  }
+
+  const raw = await response.text();
+
+  if (!response.ok) {
+    return {
+      ok: false,
+      error: classifyProviderError(response.status, raw)
+        .message,
+    };
+  }
+
+  let data;
+
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    return {
+      ok: false,
+      error: "Response image provider bukan JSON valid.",
+    };
+  }
+
+  const parts =
+    data?.candidates?.[0]?.content?.parts || [];
+
+  const imagePart = parts.find(
+    (p) => p?.inlineData?.data
+  );
+
+  if (!imagePart) {
+    return {
+      ok: false,
+      error: "Provider tidak mengembalikan gambar.",
+    };
+  }
+
+  return {
+    ok: true,
+    mimeType: imagePart.inlineData.mimeType || "image/png",
+    base64: imagePart.inlineData.data,
   };
 }
 
@@ -613,6 +766,39 @@ export default async function handler(req, res) {
     }
 
     /*
+     * Deteksi image generation request.
+     * Ini dicek DULUAN, sebelum website/text provider,
+     * soalnya kalau user minta gambar/logo, kita gak mau
+     * malah balikin kode SVG dari text model.
+     */
+    const imageRequest = isImageRequest(messages);
+
+    if (imageRequest) {
+      const prompt = getLatestUserText(messages);
+
+      const imgResult = await generateImage(prompt);
+
+      if (imgResult.ok) {
+        const dataUrl = `data:${imgResult.mimeType};base64,${imgResult.base64}`;
+
+        return json(res, 200, {
+          ok: true,
+          content: `Nih gambar yang lu minta:\n\n![Generated image](${dataUrl})`,
+          provider: "gemini-image",
+          agent,
+          website: false,
+          image: true,
+        });
+      }
+
+      return json(res, 502, {
+        ok: false,
+        error: `Gagal generate gambar: ${imgResult.error}`,
+        image: true,
+      });
+    }
+
+    /*
      * Deteksi website request.
      */
     const websiteRequest =
@@ -630,9 +816,15 @@ export default async function handler(req, res) {
     /*
      * Untuk website kita beri output lebih panjang.
      * Request biasa tetap lebih hemat.
+     *
+     * 4096 sering gak cukup buat HTML+CSS+JS lengkap
+     * dalam satu file, apalagi kalau modelnya verbose —
+     * makanya output suka kepotong di tengah CSS/JS.
+     * Naikin ke 8192 (batas aman yang didukung semua
+     * provider di PROVIDERS).
      */
     const maxTokens = websiteRequest
-      ? 4096
+      ? 8192
       : 2048;
 
     const payload = {
@@ -680,12 +872,40 @@ export default async function handler(req, res) {
       );
 
       if (result.ok) {
+        let finalContent = result.content;
+
+        /*
+         * Kalau provider berhenti karena kehabisan token
+         * (bukan karena udah selesai), kasih tau user
+         * secara eksplisit — jangan biarin dia nebak-nebak
+         * kenapa kode-nya nanggung di tengah.
+         */
+        if (result.finishReason === "length") {
+          /*
+           * Kalau output kepotong di TENGAH code block
+           * (jumlah ``` ganjil = fence belum ditutup),
+           * tutup dulu fence-nya biar peringatan di bawah
+           * gak ikut ke-render sebagai bagian dari kode.
+           */
+          const fenceCount = (
+            finalContent.match(/```/g) || []
+          ).length;
+
+          if (fenceCount % 2 !== 0) {
+            finalContent += "\n```";
+          }
+
+          finalContent +=
+            "\n\n⚠️ **Kode di atas kepotong** karena kepanjangan buat sekali generate. Balas \"lanjutin\" biar gue sambungin dari situ.";
+        }
+
         return json(res, 200, {
           ok: true,
-          content: result.content,
+          content: finalContent,
           provider: result.provider,
           agent,
           website: websiteRequest,
+          truncated: result.finishReason === "length",
         });
       }
 
