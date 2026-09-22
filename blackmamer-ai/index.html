@@ -541,7 +541,18 @@ html[data-theme="light"] #screen-chat::before{background:linear-gradient(90deg,r
 .bm-nav-label{margin:.05rem .45rem -.35rem;color:var(--dim);font-size:.64rem;text-transform:uppercase;letter-spacing:.15em;font-weight:800;flex:none}
 .bm-nav{display:grid;gap:.15rem;flex:none}.bm-nav button{width:100%;display:flex;align-items:center;gap:.65rem;border:0;border-radius:10px;padding:.58rem .65rem;background:transparent;color:var(--muted);cursor:pointer;text-align:left;font:600 .78rem var(--f-body);}
 .bm-nav button:hover,.bm-nav button.active{background:var(--panel-soft);color:var(--text)}.bm-nav svg{width:15px;height:15px;flex:none}
-.bm-premium{margin-top:auto;border:1px solid rgba(217,173,92,.2);border-radius:15px;padding:.85rem;background:linear-gradient(155deg,rgba(217,173,92,.12),var(--panel-soft-2));box-shadow:0 20px 45px -30px rgba(217,173,92,.45);flex:none;}
+.bm-chat-section{flex:1;min-height:0;display:flex;flex-direction:column;gap:0;overflow:hidden;}
+.bm-chat-section-hd{display:flex;align-items:center;justify-content:space-between;margin:.05rem .45rem .25rem;flex:none;}
+.bm-chat-section-hd span{color:var(--dim);font-size:.64rem;text-transform:uppercase;letter-spacing:.15em;font-weight:800;}
+.bm-sort-btn{border:0;background:none;color:var(--dim);cursor:pointer;padding:.1rem .2rem;border-radius:5px;font-size:.75rem;line-height:1;}
+.bm-sort-btn:hover{color:var(--text);background:var(--panel-soft);}
+.bm-chat-list{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:.05rem;padding:0 .05rem;scrollbar-width:thin;scrollbar-color:var(--line) transparent;}
+.bm-chat-list::-webkit-scrollbar{width:3px;}.bm-chat-list::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
+.bm-chat-item{width:100%;border:0;border-radius:8px;padding:.42rem .6rem;background:transparent;color:var(--muted);cursor:pointer;text-align:left;font:500 .74rem var(--f-body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;transition:background .12s,color .12s;}
+.bm-chat-item:hover{background:var(--panel-soft);color:var(--text);}
+.bm-chat-item.active{background:rgba(217,173,92,.1);color:var(--gold-bright);font-weight:700;}
+.bm-chat-empty{padding:.4rem .6rem;color:var(--dim);font-size:.7rem;font-style:italic;}
+.bm-premium{border:1px solid rgba(217,173,92,.2);border-radius:15px;padding:.85rem;background:linear-gradient(155deg,rgba(217,173,92,.12),var(--panel-soft-2));box-shadow:0 20px 45px -30px rgba(217,173,92,.45);flex:none;}
 .bm-premium-title{display:flex;align-items:center;gap:.45rem;font:800 .8rem var(--f-display);color:var(--text)}.bm-premium-title svg{width:14px;color:var(--gold-bright)}.bm-premium p{margin:.4rem 0 .75rem;color:var(--muted);font-size:.66rem;line-height:1.45}.bm-premium button{width:100%;border:0;border-radius:9px;padding:.52rem;color:#1b1408;background:linear-gradient(145deg,#f5cf8a,#b78738);font:800 .7rem var(--f-body);cursor:pointer}
 .bm-account{position:relative;flex:none;margin-top:.6rem}
 .bm-account-bar{width:100%;display:flex;align-items:center;gap:.55rem;border:1px solid var(--line-soft);border-radius:12px;background:var(--panel-soft-2);padding:.5rem .6rem;cursor:pointer;text-align:left}
@@ -688,6 +699,15 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
     <aside class="bm-sidebar" aria-label="BlackMamer AI sidebar">
       <div class="bm-brand"><div class="bm-brand-mark">BM</div><div class="bm-brand-name">BlackMamer <b>AI</b></div></div>
       <button class="bm-side-new" id="sideNewChat" type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>New Chat</button>
+      <div class="bm-chat-section">
+        <div class="bm-chat-section-hd">
+          <span>Chats and tasks</span>
+          <button class="bm-sort-btn" id="chatSortBtn" type="button" title="Urutkan">⇅</button>
+        </div>
+        <div class="bm-chat-list" id="chatList">
+          <div class="bm-chat-empty">Belum ada chat.</div>
+        </div>
+      </div>
       <div class="bm-nav-label">Features</div>
       <nav class="bm-nav">
         <button class="active" type="button" data-nav="chat"><svg viewBox="0 0 24 24" fill="none"><path d="M5 6.5A3.5 3.5 0 0 1 8.5 3H19v14.5A3.5 3.5 0 0 1 15.5 21H8.5A3.5 3.5 0 0 1 5 17.5v-11Z" stroke="currentColor" stroke-width="1.6"/><path d="M5 16h10.5a3.5 3.5 0 0 1 3.5 3.5V21" stroke="currentColor" stroke-width="1.6"/></svg>Chat</button>
@@ -797,7 +817,16 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
 
 <script>
 (() => {
-  const STORE="bm-ai-chat-v2", THEME_STORE="bm-ai-theme", AGENT_STORE="bm-ai-agent", ASSET_STORE="bm-ai-assets";
+  const STORE="bm-ai-chat-v2", THEME_STORE="bm-ai-theme", AGENT_STORE="bm-ai-agent", ASSET_STORE="bm-ai-assets", CHATS_STORE="bm-ai-chats-v1";
+  let currentChatId=null, chatSortNewest=true;
+  function genChatId(){return "chat-"+Date.now()+"-"+Math.random().toString(36).slice(2,6)}
+  function loadAllChats(){try{return JSON.parse(localStorage.getItem(CHATS_STORE)||"[]")}catch(_){return []}}
+  function saveAllChats(chats){try{localStorage.setItem(CHATS_STORE,JSON.stringify(chats.slice(0,120)))}catch(_){}}
+  function getChatTitle(msgs){const m=msgs.find(x=>x.role==="user");return m?m.content.replace(/\n/g," ").trim().slice(0,50)||"Untitled":"Untitled"}
+  function saveCurrentChat(){if(!messages.length)return;const chats=loadAllChats();if(!currentChatId)currentChatId=genChatId();const idx=chats.findIndex(c=>c.id===currentChatId);const entry={id:currentChatId,title:getChatTitle(messages),messages:messages.slice(-60),updatedAt:Date.now()};if(idx>=0)chats[idx]=entry;else chats.unshift(entry);saveAllChats(chats);renderChatList()}
+  function renderChatList(){const el=$("#chatList");if(!el)return;const chats=loadAllChats();if(!chats.length){el.innerHTML='<div class="bm-chat-empty">Belum ada chat.</div>';return}const list=chatSortNewest?[...chats]:[...chats].reverse();el.innerHTML=list.map(c=>`<button class="bm-chat-item${c.id===currentChatId?" active":""}" type="button" data-chat-id="${esc(c.id)}">${esc(c.title)}</button>`).join("")}
+  function switchToChat(id){const chats=loadAllChats();const chat=chats.find(c=>c.id===id);if(!chat)return;currentChatId=id;messages=chat.messages||[];error=null;showView("chat");render();scrollBottom();renderChatList()}
+  function migrateOldChat(){try{const old=JSON.parse(localStorage.getItem(STORE)||"[]");if(Array.isArray(old)&&old.length){const chats=loadAllChats();if(!chats.length){currentChatId=genChatId();const entry={id:currentChatId,title:getChatTitle(old),messages:old.slice(-60),updatedAt:Date.now()};saveAllChats([entry]);messages=old.filter(m=>m&&typeof m.content==="string"&&["user","assistant"].includes(m.role))}}else{const chats=loadAllChats();if(chats.length){const last=chatSortNewest?chats[0]:chats[chats.length-1];currentChatId=last.id;messages=last.messages||[]}}}catch(_){}}
   const AGENTS=[
     {id:"auto",label:"BM Nexus",sub:"Routing otomatis"},
     {id:"groq",label:"BM Velocity",sub:"Cepat buat chat ringan"},
@@ -840,10 +869,8 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
 
   const input=$("#input"),sendBtn=$("#send"),thread=$("#thread"),workspaceScroll=$("#workspaceScroll"),hero=$("#hero"),attachmentsEl=$("#attachments"),filePicker=$("#filePicker");
   let messages=[],busy=false,error=null,attachments=[],artifactSeq=0;
-  function loadMessages(){try{const saved=JSON.parse(localStorage.getItem(STORE)||"[]");if(Array.isArray(saved))messages=saved.filter(m=>m&&typeof m.content==="string"&&["user","assistant"].includes(m.role))}catch(_){}
-  }
-  function persist(){try{localStorage.setItem(STORE,JSON.stringify(messages.slice(-60)))}catch(_){}
-  }
+  function loadMessages(){migrateOldChat()}
+  function persist(){saveCurrentChat();try{localStorage.setItem(STORE,JSON.stringify(messages.slice(-60)))}catch(_){}}
   function loadAssets(){try{const x=JSON.parse(localStorage.getItem(ASSET_STORE)||"[]");return Array.isArray(x)?x:[]}catch(_){return []}}
   function saveAssets(){try{localStorage.setItem(ASSET_STORE,JSON.stringify(attachments.map(a=>({name:a.file.name,size:a.file.size,type:a.file.type,addedAt:a.addedAt})).concat(loadAssets()).slice(0,40)))}catch(_){}
   }
@@ -914,7 +941,7 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
   function renderLocalView(name){const el=$(`#${name==='archived'?'archivedList':name+'List'}`);if(!el)return;if(name==='library'){el.innerHTML=messages.length?`<div class="bm-local-grid">${messages.filter(m=>m.role==='assistant').slice(-12).reverse().map((m,i)=>localCard(`Jawaban ${i+1}`,m.content.slice(0,150))).join('')}</div>`:`<div class="bm-empty-local">Belum ada hasil di Library.</div>`}else if(name==='assets'){const a=loadAssets();el.innerHTML=a.length?`<div class="bm-local-grid">${a.map(x=>localCard(x.name,`${x.type||'file'} • ${formatBytes(x.size)}`)).join('')}</div>`:`<div class="bm-empty-local">Belum ada file yang lu attach.</div>`}else if(name==='prompts'){const prompts=JSON.parse(localStorage.getItem('bm-ai-prompts')||'[]');el.innerHTML=prompts.length?`<div class="bm-local-grid">${prompts.map((p,i)=>`<button class="bm-local-card" data-use-prompt="${i}" type="button"><strong>${esc(p.slice(0,50))}</strong><small>${esc(p)}</small></button>`).join('')}</div>`:`<div class="bm-empty-local">Belum ada prompt tersimpan.</div>`}else if(name==='projects'){el.innerHTML=`<div class="bm-local-grid">${localCard('BlackMamer AI','Workspace aktif di browser ini')}${localCard('Chat history',`${messages.length} pesan tersimpan lokal`)}</div>`}else if(name==='archived'){el.innerHTML=`<div class="bm-empty-local">Belum ada chat yang diarsipkan. Nanti chat bisa dipindahkan ke sini tanpa menghapus history.</div>`}}
   $$("[data-nav]").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.nav)));
   $("#sideNewChat").addEventListener("click",newChat);$("#mobileNewChat").addEventListener("click",newChat);
-  function newChat(){if(busy)return;messages=[];error=null;attachments=[];renderAttachments();persist();showView('chat');render();workspaceScroll.scrollTo({top:0})}
+  function newChat(){if(busy)return;saveCurrentChat();currentChatId=null;messages=[];error=null;attachments=[];renderAttachments();showView('chat');render();workspaceScroll.scrollTo({top:0});renderChatList()}
   $("#configBtn").addEventListener("click",()=>{showView('chat');agentBtn.click()});
   $("#exportBtn").addEventListener("click",()=>{const blob=new Blob([JSON.stringify({app:"BlackMamer AI",exportedAt:new Date().toISOString(),messages},null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="blackmamer-ai-chat.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)});
 
@@ -988,7 +1015,7 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
       btn.disabled=false;btn.textContent="Cabut";
     }
   });
-  function enterChat(){loadMessages();showScreen('chat');showView('chat');render();fit()}
+  function enterChat(){loadMessages();showScreen('chat');showView('chat');render();fit();renderChatList()}
 
   /* ---------- Account menu (Settings, Language, Get help, Upgrade, Apps, Learn more, API keys, Log out) ---------- */
   const accountBar=$("#accountBar"),accountMenu=$("#accountMenu"),accountAvatar=$("#accountAvatar"),accountName=$("#accountName"),accountMenuEmail=$("#accountMenuEmail"),accountLangVal=$("#accountLangVal");
@@ -1087,7 +1114,11 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
     }
   });
 
-  loadMessages();render();fit();
+  // Chat list events
+  document.getElementById('chatList')?.addEventListener('click',e=>{const btn=e.target.closest('[data-chat-id]');if(btn)switchToChat(btn.dataset.chatId)});
+  document.getElementById('chatSortBtn')?.addEventListener('click',()=>{chatSortNewest=!chatSortNewest;renderChatList()});
+
+  loadMessages();render();fit();renderChatList();
   (async()=>{try{const r=await fetch('/api/auth/me');if(r.ok){enterChat();return}}catch(_){}showScreen('login')})();
 })();
 </script>
