@@ -529,7 +529,7 @@ html[data-theme="light"]{
 html[data-theme="light"] #screen-chat::before{background:linear-gradient(90deg,rgba(255,255,255,.38),transparent 26%,transparent 74%,rgba(60,45,20,.035));}
 .bm-workspace{position:relative;z-index:1;display:grid;grid-template-columns:236px minmax(0,1fr);height:100%;min-height:100%;}
 .bm-sidebar{
-  position:relative;height:100dvh;min-height:0;display:flex;flex-direction:column;gap:1rem;
+  position:relative;height:100dvh;min-height:0;display:flex;flex-direction:column;gap:.6rem;
   padding:1rem .75rem .75rem;background:var(--sidebar);border-right:1px solid var(--line-soft);
   backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);overflow:hidden;
 }
@@ -541,7 +541,7 @@ html[data-theme="light"] #screen-chat::before{background:linear-gradient(90deg,r
 .bm-nav-label{margin:.05rem .45rem -.35rem;color:var(--dim);font-size:.64rem;text-transform:uppercase;letter-spacing:.15em;font-weight:800;flex:none}
 .bm-nav{display:grid;gap:.15rem;flex:none}.bm-nav button{width:100%;display:flex;align-items:center;gap:.65rem;border:0;border-radius:10px;padding:.58rem .65rem;background:transparent;color:var(--muted);cursor:pointer;text-align:left;font:600 .78rem var(--f-body);}
 .bm-nav button:hover,.bm-nav button.active{background:var(--panel-soft);color:var(--text)}.bm-nav svg{width:15px;height:15px;flex:none}
-.bm-chat-section{flex:1;min-height:0;display:flex;flex-direction:column;gap:0;overflow:hidden;}
+.bm-chat-section{flex:1;min-height:0;display:flex;flex-direction:column;gap:0;overflow:hidden;min-height:60px;}
 .bm-chat-section-hd{display:flex;align-items:center;justify-content:space-between;margin:.05rem .45rem .25rem;flex:none;}
 .bm-chat-section-hd span{color:var(--dim);font-size:.64rem;text-transform:uppercase;letter-spacing:.15em;font-weight:800;}
 .bm-sort-btn{border:0;background:none;color:var(--dim);cursor:pointer;padding:.1rem .2rem;border-radius:5px;font-size:.75rem;line-height:1;}
@@ -552,6 +552,8 @@ html[data-theme="light"] #screen-chat::before{background:linear-gradient(90deg,r
 .bm-chat-item:hover{background:var(--panel-soft);color:var(--text);}
 .bm-chat-item.active{background:rgba(217,173,92,.1);color:var(--gold-bright);font-weight:700;}
 .bm-chat-empty{padding:.4rem .6rem;color:var(--dim);font-size:.7rem;font-style:italic;}
+/* top-fixed nav wrapper — doesn't grow */
+.bm-sidebar-top{display:flex;flex-direction:column;gap:.5rem;flex:none;}
 .bm-premium{border:1px solid rgba(217,173,92,.2);border-radius:15px;padding:.85rem;background:linear-gradient(155deg,rgba(217,173,92,.12),var(--panel-soft-2));box-shadow:0 20px 45px -30px rgba(217,173,92,.45);flex:none;}
 .bm-premium-title{display:flex;align-items:center;gap:.45rem;font:800 .8rem var(--f-display);color:var(--text)}.bm-premium-title svg{width:14px;color:var(--gold-bright)}.bm-premium p{margin:.4rem 0 .75rem;color:var(--muted);font-size:.66rem;line-height:1.45}.bm-premium button{width:100%;border:0;border-radius:9px;padding:.52rem;color:#1b1408;background:linear-gradient(145deg,#f5cf8a,#b78738);font:800 .7rem var(--f-body);cursor:pointer}
 .bm-account{position:relative;flex:none;margin-top:.6rem}
@@ -699,6 +701,20 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
     <aside class="bm-sidebar" aria-label="BlackMamer AI sidebar">
       <div class="bm-brand"><div class="bm-brand-mark">BM</div><div class="bm-brand-name">BlackMamer <b>AI</b></div></div>
       <button class="bm-side-new" id="sideNewChat" type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>New Chat</button>
+      <div class="bm-sidebar-top">
+        <div class="bm-nav-label">Features</div>
+        <nav class="bm-nav">
+          <button class="active" type="button" data-nav="chat"><svg viewBox="0 0 24 24" fill="none"><path d="M5 6.5A3.5 3.5 0 0 1 8.5 3H19v14.5A3.5 3.5 0 0 1 15.5 21H8.5A3.5 3.5 0 0 1 5 17.5v-11Z" stroke="currentColor" stroke-width="1.6"/><path d="M5 16h10.5a3.5 3.5 0 0 1 3.5 3.5V21" stroke="currentColor" stroke-width="1.6"/></svg>Chat</button>
+          <button type="button" data-nav="archived"><svg viewBox="0 0 24 24" fill="none"><path d="M6 5h12a2 2 0 0 1 2 2v12H4V7a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6"/><path d="M8 3v4M16 3v4M4 10h16" stroke="currentColor" stroke-width="1.6"/></svg>Archived</button>
+          <button type="button" data-nav="library"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4h14v16H5z" stroke="currentColor" stroke-width="1.6"/><path d="m8 8 3 3 2-2 3 3M8 16h8" stroke="currentColor" stroke-width="1.6"/></svg>Library</button>
+        </nav>
+        <div class="bm-nav-label">Workspaces</div>
+        <nav class="bm-nav">
+          <button type="button" data-nav="projects"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7.5 12 4l8 3.5v9L12 20l-8-3.5v-9Z" stroke="currentColor" stroke-width="1.6"/><path d="m8 9 4 2 4-2M12 11v6" stroke="currentColor" stroke-width="1.6"/></svg>Projects</button>
+          <button type="button" data-nav="assets"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><circle cx="9" cy="10" r="1.5" stroke="currentColor" stroke-width="1.6"/><path d="m6.5 16 4-4 2.5 2 2-2 2.5 4" stroke="currentColor" stroke-width="1.6"/></svg>Assets</button>
+          <button type="button" data-nav="prompts"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4h14v16H5z" stroke="currentColor" stroke-width="1.6"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.6"/></svg>Prompts</button>
+        </nav>
+      </div>
       <div class="bm-chat-section">
         <div class="bm-chat-section-hd">
           <span>Chats and tasks</span>
@@ -708,18 +724,6 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
           <div class="bm-chat-empty">Belum ada chat.</div>
         </div>
       </div>
-      <div class="bm-nav-label">Features</div>
-      <nav class="bm-nav">
-        <button class="active" type="button" data-nav="chat"><svg viewBox="0 0 24 24" fill="none"><path d="M5 6.5A3.5 3.5 0 0 1 8.5 3H19v14.5A3.5 3.5 0 0 1 15.5 21H8.5A3.5 3.5 0 0 1 5 17.5v-11Z" stroke="currentColor" stroke-width="1.6"/><path d="M5 16h10.5a3.5 3.5 0 0 1 3.5 3.5V21" stroke="currentColor" stroke-width="1.6"/></svg>Chat</button>
-        <button type="button" data-nav="archived"><svg viewBox="0 0 24 24" fill="none"><path d="M6 5h12a2 2 0 0 1 2 2v12H4V7a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6"/><path d="M8 3v4M16 3v4M4 10h16" stroke="currentColor" stroke-width="1.6"/></svg>Archived</button>
-        <button type="button" data-nav="library"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4h14v16H5z" stroke="currentColor" stroke-width="1.6"/><path d="m8 8 3 3 2-2 3 3M8 16h8" stroke="currentColor" stroke-width="1.6"/></svg>Library</button>
-      </nav>
-      <div class="bm-nav-label">Workspaces</div>
-      <nav class="bm-nav">
-        <button type="button" data-nav="projects"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7.5 12 4l8 3.5v9L12 20l-8-3.5v-9Z" stroke="currentColor" stroke-width="1.6"/><path d="m8 9 4 2 4-2M12 11v6" stroke="currentColor" stroke-width="1.6"/></svg>Projects</button>
-        <button type="button" data-nav="assets"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><circle cx="9" cy="10" r="1.5" stroke="currentColor" stroke-width="1.6"/><path d="m6.5 16 4-4 2.5 2 2-2 2.5 4" stroke="currentColor" stroke-width="1.6"/></svg>Assets</button>
-        <button type="button" data-nav="prompts"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4h14v16H5z" stroke="currentColor" stroke-width="1.6"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.6"/></svg>Prompts</button>
-      </nav>
       <div class="bm-premium"><div class="bm-premium-title"><svg viewBox="0 0 24 24" fill="none"><path d="m12 3 2.6 5.3L20 9l-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5L4 9l5.4-.7L12 3Z" stroke="currentColor" stroke-width="1.5"/></svg>BlackMamer Pro</div><p>Unlock higher limits, faster responses and premium AI tools.</p><button type="button" id="upgradeBtn">Upgrade</button></div>
       <div class="bm-account">
         <div class="bm-account-menu" id="accountMenu" hidden role="menu" aria-label="Account menu">
@@ -858,7 +862,7 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
   function runResendCooldown(seconds){clearInterval(resendCooldownId);let left=seconds;resendBtn.disabled=true;const tick=()=>{resendTimer.textContent=left>0?` (${left}s)`:"";if(left<=0){clearInterval(resendCooldownId);resendBtn.disabled=false}left--};tick();resendCooldownId=setInterval(tick,1000)}
   otpInputs.forEach((inp,idx)=>{inp.addEventListener("input",()=>{inp.value=inp.value.replace(/\D/g,"").slice(-1);inp.classList.toggle("filled",!!inp.value);if(inp.value&&otpInputs[idx+1])otpInputs[idx+1].focus();if(otpInputs.every(i=>i.value))verifyOtp()});inp.addEventListener("keydown",e=>{if(e.key==="Backspace"&&!inp.value&&otpInputs[idx-1])otpInputs[idx-1].focus();if(e.key==="Enter")verifyOtp()});inp.addEventListener("paste",e=>{const t=(e.clipboardData||window.clipboardData).getData("text").replace(/\D/g,"");if(!t)return;e.preventDefault();t.split("").slice(0,6).forEach((ch,i)=>{otpInputs[i].value=ch;otpInputs[i].classList.add("filled")});if(otpInputs.every(i=>i.value))verifyOtp()})});
   let verifying=false;
-  async function verifyOtp(){if(verifying)return;const code=otpInputs.map(i=>i.value).join("");if(code.length!==6)return setErr(otpErr,"Isi semua 6 digit kodenya.");setErr(otpErr,"");verifying=true;busyBtn(otpSubmit,true,"Verifikasi");try{const r=await fetch("/api/auth/verify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:pendingEmail,code})});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||"Verifikasi gagal.");const card=otpSubmit.closest(".otp-card");otpSuccess.setAttribute("aria-hidden","false");card.classList.add("successing");setTimeout(()=>{card.classList.remove("successing");otpSuccess.setAttribute("aria-hidden","true");enterChat()},1650)}catch(err){const card=otpSubmit.closest(".otp-card");card.classList.remove("successing");otpSuccess.setAttribute("aria-hidden","true");setErr(otpErr,err.message||"Verifikasi gagal.");otpInputs.forEach(i=>{i.value="";i.classList.remove("filled")});otpInputs[0].focus()}verifying=false;busyBtn(otpSubmit,false,"Verifikasi")}
+  async function verifyOtp(){if(verifying)return;const code=otpInputs.map(i=>i.value).join("");if(code.length!==6)return setErr(otpErr,"Isi semua 6 digit kodenya.");setErr(otpErr,"");verifying=true;busyBtn(otpSubmit,true,"Verifikasi");try{const r=await fetch("/api/auth/verify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:pendingEmail,code})});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||"Verifikasi gagal.");const card=otpSubmit.closest(".otp-card");otpSuccess.setAttribute("aria-hidden","false");card.classList.add("successing");setTimeout(()=>{card.classList.remove("successing");otpSuccess.setAttribute("aria-hidden","true");setAccountIdentity(pendingEmail);enterChat()},1650)}catch(err){const card=otpSubmit.closest(".otp-card");card.classList.remove("successing");otpSuccess.setAttribute("aria-hidden","true");setErr(otpErr,err.message||"Verifikasi gagal.");otpInputs.forEach(i=>{i.value="";i.classList.remove("filled")});otpInputs[0].focus()}verifying=false;busyBtn(otpSubmit,false,"Verifikasi")}
   otpSubmit.addEventListener("click",verifyOtp);
   resendBtn.addEventListener("click",async()=>{if(resendBtn.disabled||!pendingEmail)return;try{const r=await fetch("/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:pendingEmail})});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||"Gagal kirim ulang.");devHint.innerHTML=data.devOtp?`<div class="dev-hint">Mode dev — kode kamu: <b>${esc(data.devOtp)}</b></div>`:"";runResendCooldown(30)}catch(err){setErr(otpErr,err.message||"Gagal kirim ulang.")}});
   otpBack.addEventListener("click",()=>{clearInterval(resendCooldownId);showScreen("login");loginEmail.focus()});
@@ -894,6 +898,7 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
   function extractLatestWebsite(){for(let i=messages.length-1;i>=0;i--){const m=messages[i];if(m.role!=="assistant")continue;const re=/```(?:html|html5)\s*\n([\s\S]*?)```/gi;let hit=null,x;while((x=re.exec(m.content||"")))hit=x[1];if(hit&&/<(?:!doctype|html|head|body|style|script)[\s>]/i.test(hit))return hit.slice(0,9000)}return ""}
   function buildAiHistory(){const out=[];const recent=messages.slice(-8);for(let i=0;i<recent.length;i++){const m=recent[i];let content=m.content||"";if(m.role==="assistant"){if(/```(?:html|html5)[\s\S]*```/i.test(content))content="[WEBSITE ARTIFACT DISEMBUNYIKAN DARI HISTORY — gunakan ARTIFACT TERAKHIR jika user meminta revisi.]";else content=content.slice(0,2200)}else{content=content.slice(0,5000)}out.push({role:m.role,content})}return out}
   async function request(){busy=true;error=null;render();scrollBottom();const context=attachments.map(a=>{const o={name:a.file.name,type:a.file.type,size:a.file.size,text:(a.text||"").slice(0,8000)};if(a.file.type.startsWith("image/")&&a.preview)o.dataUrl=a.preview;return o});const artifactContext=extractLatestWebsite();try{const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:buildAiHistory(),agent:currentAgent,attachments:context,artifactContext,stream:true})});if(r.status===401){showScreen("login");throw new Error("Sesi habis, login lagi ya.")}
+    if(r.status===429){throw new Error("Rate limit — provider lagi kelebihan request. Tunggu 30 detik lalu kirim ulang.")}
     const ctype=r.headers.get("content-type")||"";
     if(r.ok&&ctype.includes("text/event-stream")&&r.body){
       const assistantMsg={role:"assistant",content:"",provider:"",agent:currentAgent};
@@ -1041,9 +1046,10 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
   function setAccountIdentity(email){
     if(!email)return;
     accountMenuEmail.textContent=email;
-    const name=email.split('@')[0];
+    const raw=email.split('@')[0].replace(/[._-]/g,' ');
+    const name=raw.split(' ').map(w=>w?w[0].toUpperCase()+w.slice(1):'').join(' ').trim()||email.split('@')[0];
     accountName.textContent=name;
-    accountAvatar.textContent=name.slice(0,1);
+    accountAvatar.textContent=name.slice(0,1).toUpperCase();
   }
 
   function openAccountMenu(){accountMenu.hidden=false;accountBar.setAttribute('aria-expanded','true')}
@@ -1119,7 +1125,7 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
   document.getElementById('chatSortBtn')?.addEventListener('click',()=>{chatSortNewest=!chatSortNewest;renderChatList()});
 
   loadMessages();render();fit();renderChatList();
-  (async()=>{try{const r=await fetch('/api/auth/me');if(r.ok){enterChat();return}}catch(_){}showScreen('login')})();
+  (async()=>{try{const r=await fetch('/api/auth/me');if(r.ok){const data=await r.json().catch(()=>({}));if(data.email)setAccountIdentity(data.email);enterChat();return}}catch(_){}showScreen('login')})();
 })();
 </script>
 </body>
