@@ -219,6 +219,19 @@ html[data-theme="light"] .field .box { background: rgba(255,255,255,.4); }
   margin-bottom: 1.1rem; font-family: var(--f-code);
 }
 
+/* ---------- auth extra ---------- */
+.forgot-row{display:flex;justify-content:flex-end;margin:-.4rem 0 1.1rem;}
+.forgot-row button{border:0;background:none;color:var(--muted);font-size:.82rem;font-weight:600;cursor:pointer;padding:0;transition:color .15s}
+.forgot-row button:hover{color:var(--gold-bright);}
+.auth-switch{margin-top:1.3rem;text-align:center;font-size:.88rem;color:var(--muted);}
+.auth-switch button{border:0;background:none;color:var(--gold-bright);font-weight:700;cursor:pointer;padding:0;font-size:inherit;}
+.auth-switch button:hover{text-decoration:underline;}
+.auth-divider{display:flex;align-items:center;gap:.75rem;margin:1.1rem 0;color:var(--muted-2);font-size:.78rem;font-weight:600;}
+.auth-divider::before,.auth-divider::after{content:"";flex:1;height:1px;background:var(--glass-border-soft);}
+.forgot-success-wrap{text-align:center;padding:.6rem 0;}
+.forgot-success-icon{width:3rem;height:3rem;border-radius:50%;margin:0 auto 1rem;display:grid;place-items:center;background:linear-gradient(155deg,rgba(217,173,92,.28),rgba(217,173,92,.06));border:1px solid var(--glass-border);color:var(--gold-bright);}
+.forgot-success-icon svg{width:1.4rem;height:1.4rem;}
+
 /* ---------- OTP screen ---------- */
 .otp-icon {
   width: 3.1rem; height: 3.1rem; border-radius: 50%; margin: 0 auto 1.1rem;
@@ -640,7 +653,7 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
   <form class="card" id="loginForm" novalidate>
     <div class="card-mark">BlackMamer <b>AI</b></div>
     <h1>Selamat datang</h1>
-    <p class="lede">Masukin email kamu, nanti dikirim kode OTP buat masuk.</p>
+    <p class="lede">Masuk ke akun kamu.</p>
     <div id="loginErr"></div>
     <div class="field">
       <label for="loginEmail">Alamat email</label>
@@ -649,10 +662,104 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
         <input id="loginEmail" type="email" inputmode="email" autocomplete="email" placeholder="nama@email.com" required>
       </div>
     </div>
+    <div class="field">
+      <label for="loginPassword">Password</label>
+      <div class="box">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2.2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="currentColor" stroke-width="1.8"/></svg>
+        <input id="loginPassword" type="password" autocomplete="current-password" placeholder="••••••••" required>
+        <button type="button" class="eye" id="loginEye" aria-label="Tampilkan password">
+          <svg id="loginEyeIcon" viewBox="0 0 24 24" fill="none"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="2.8" stroke="currentColor" stroke-width="1.7"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="forgot-row">
+      <button type="button" id="goForgot">Lupa password?</button>
+    </div>
     <button class="btn-gold" id="loginSubmit" type="submit">
-      <span>Kirim kode OTP</span>
+      <span>Login</span>
     </button>
-    <p class="card-foot">Kode verifikasi dikirim ke email kamu, berlaku 5 menit.</p>
+    <div class="auth-switch">Belum punya akun? <button type="button" id="goSignup">Daftar sekarang</button></div>
+  </form>
+</section>
+
+<!-- ================= SIGNUP ================= -->
+<section class="stage" id="screen-signup" hidden>
+  <form class="card" id="signupForm" novalidate>
+    <button class="back-link" id="signupBack" type="button">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Kembali login
+    </button>
+    <div class="card-mark">BlackMamer <b>AI</b></div>
+    <h1>Buat akun</h1>
+    <p class="lede">Daftar gratis dan mulai chat sekarang.</p>
+    <div id="signupErr"></div>
+    <div class="field">
+      <label for="signupName">Nama</label>
+      <div class="box">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.7"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <input id="signupName" type="text" autocomplete="name" placeholder="Nama kamu" required>
+      </div>
+    </div>
+    <div class="field">
+      <label for="signupEmail">Alamat email</label>
+      <div class="box">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 6.5h18v11a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-11Z" stroke="currentColor" stroke-width="1.7"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <input id="signupEmail" type="email" inputmode="email" autocomplete="email" placeholder="nama@email.com" required>
+      </div>
+    </div>
+    <div class="field">
+      <label for="signupPassword">Password</label>
+      <div class="box">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2.2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="currentColor" stroke-width="1.8"/></svg>
+        <input id="signupPassword" type="password" autocomplete="new-password" placeholder="Minimal 8 karakter" required>
+        <button type="button" class="eye" id="signupEye" aria-label="Tampilkan password">
+          <svg id="signupEyeIcon" viewBox="0 0 24 24" fill="none"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="2.8" stroke="currentColor" stroke-width="1.7"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="field">
+      <label for="signupConfirm">Konfirmasi password</label>
+      <div class="box">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><rect x="5" y="10.5" width="14" height="9.5" rx="2.2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="currentColor" stroke-width="1.8"/></svg>
+        <input id="signupConfirm" type="password" autocomplete="new-password" placeholder="Ulangi password" required>
+      </div>
+    </div>
+    <button class="btn-gold" id="signupSubmit" type="submit">
+      <span>Daftar</span>
+    </button>
+    <div class="auth-switch">Sudah punya akun? <button type="button" id="goLoginFromSignup">Masuk</button></div>
+  </form>
+</section>
+
+<!-- ================= FORGOT PASSWORD ================= -->
+<section class="stage" id="screen-forgot" hidden>
+  <form class="card" id="forgotForm" novalidate>
+    <button class="back-link" id="forgotBack" type="button">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Kembali login
+    </button>
+    <div class="card-mark">BlackMamer <b>AI</b></div>
+    <h1>Reset password</h1>
+    <p class="lede" id="forgotLede">Masukin emailmu, nanti gua kirimin link buat reset passwordnya.</p>
+    <div id="forgotErr"></div>
+    <div id="forgotFields">
+      <div class="field">
+        <label for="forgotEmail">Alamat email</label>
+        <div class="box">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 6.5h18v11a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-11Z" stroke="currentColor" stroke-width="1.7"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <input id="forgotEmail" type="email" inputmode="email" autocomplete="email" placeholder="nama@email.com" required>
+        </div>
+      </div>
+      <button class="btn-gold" id="forgotSubmit" type="submit"><span>Kirim link reset</span></button>
+    </div>
+    <div id="forgotSuccess" hidden style="text-align:center;padding:.5rem 0;">
+      <div class="forgot-success-icon">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M3 6.5h18v11a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-11Z" stroke="currentColor" stroke-width="1.7"/></svg>
+      </div>
+      <strong style="font-size:1.05rem;color:var(--ink);display:block;margin-bottom:.4rem;">Email terkirim!</strong>
+      <p style="color:var(--muted);font-size:.88rem;margin:0 0 1.2rem;line-height:1.5">Cek inbox kamu dan klik link reset yang gua kirim.</p>
+      <button type="button" class="btn-gold" id="forgotDoneBtn"><span>Oke, kembali login</span></button>
+    </div>
   </form>
 </section>
 
@@ -848,15 +955,38 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
   applyTheme(savedTheme==="light"?"light":"dark");
   themeSwitch?.addEventListener("click",()=>{const n=html.dataset.theme==="light"?"dark":"light";applyTheme(n);try{localStorage.setItem(THEME_STORE,n)}catch(_){} });
 
-  const flowBg=$("#flowBg"), screens={login:$("#screen-login"),otp:$("#screen-otp"),chat:$("#screen-chat")};
+  const flowBg=$("#flowBg"), screens={login:$("#screen-login"),otp:$("#screen-otp"),signup:$("#screen-signup"),forgot:$("#screen-forgot"),chat:$("#screen-chat")};
   let screenMotionTimer=null;
-  function showScreen(name){clearTimeout(screenMotionTimer);Object.entries(screens).forEach(([k,el])=>{const active=k===name;el.hidden=!active;el.classList.remove("screen-motion-in");if(active){void el.offsetWidth;el.classList.add("screen-motion-in")}});flowBg?.classList.toggle("on",name==="login"||name==="otp");screenMotionTimer=setTimeout(()=>screens[name]?.classList.remove("screen-motion-in"),900)}
+  function showScreen(name){clearTimeout(screenMotionTimer);Object.entries(screens).forEach(([k,el])=>{const active=k===name;el.hidden=!active;el.classList.remove("screen-motion-in");if(active){void el.offsetWidth;el.classList.add("screen-motion-in")}});flowBg?.classList.toggle("on",["login","otp","signup","forgot"].includes(name));screenMotionTimer=setTimeout(()=>screens[name]?.classList.remove("screen-motion-in"),900)}
   showScreen("login");
 
-  const loginForm=$("#loginForm"),loginEmail=$("#loginEmail"),loginSubmit=$("#loginSubmit"),loginErr=$("#loginErr");let pendingEmail="";
+  const loginForm=$("#loginForm"),loginEmail=$("#loginEmail"),loginPassword=$("#loginPassword"),loginSubmit=$("#loginSubmit"),loginErr=$("#loginErr");let pendingEmail="";
   function setErr(el,msg){el.innerHTML=msg?`<div class="form-err"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>${esc(String(msg))}</span></div>`:""}
-  function busyBtn(btn,busy,label){btn.disabled=busy;btn.classList.toggle("is-verifying",busy);btn.innerHTML=busy?`<span class="spin"></span><span>Memproses…</span>`:`<span>${label}</span>`}
-  loginForm.addEventListener("submit",async e=>{e.preventDefault();setErr(loginErr,"");const email=loginEmail.value.trim();if(!email)return setErr(loginErr,"Isi email dulu.");busyBtn(loginSubmit,true);try{const r=await fetch("/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||"Gagal login.");pendingEmail=email;startOtpScreen(data)}catch(err){setErr(loginErr,err.message||"Gagal login.")}busyBtn(loginSubmit,false,"Kirim kode OTP")});
+  function busyBtn(btn,busy,label){btn.disabled=busy;btn.classList.toggle("is-verifying",busy);btn.innerHTML=busy?`<span class="spin"></span><span>Memproses…</span>`:`<span>${label||btn.querySelector("span")?.textContent||"OK"}</span>`}
+
+  // Password eye toggle helper
+  function makeEye(btnId,iconId,inputId){const btn=$(btnId),icon=$(iconId),inp=$(inputId);if(!btn||!inp)return;btn.addEventListener("click",()=>{const show=inp.type==="password";inp.type=show?"text":"password";icon.innerHTML=show?'<path d="M17.94 17.94A10 10 0 0 1 12 19c-7 0-10-7-10-7a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9 9 0 0 1 12 4c7 0 10 7 10 7a18.5 18.5 0 0 1-2.16 3.19M1 1l22 22" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>':'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="2.8" stroke="currentColor" stroke-width="1.7"/>'});}
+  makeEye("#loginEye","#loginEyeIcon","#loginPassword");
+  makeEye("#signupEye","#signupEyeIcon","#signupPassword");
+
+  // Login
+  loginForm.addEventListener("submit",async e=>{e.preventDefault();setErr(loginErr,"");const email=loginEmail.value.trim(),password=loginPassword?.value||"";if(!email)return setErr(loginErr,"Isi email dulu.");if(!password)return setErr(loginErr,"Isi password dulu.");busyBtn(loginSubmit,true,"Login");try{const r=await fetch("/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,password})});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||"Email atau password salah.");if(data.otp){pendingEmail=email;startOtpScreen(data)}else{setAccountIdentity(email);enterChat()}}catch(err){setErr(loginErr,err.message||"Gagal login.")}busyBtn(loginSubmit,false,"Login")});
+
+  // Nav links
+  $("#goForgot")?.addEventListener("click",()=>showScreen("forgot"));
+  $("#goSignup")?.addEventListener("click",()=>showScreen("signup"));
+  $("#signupBack")?.addEventListener("click",()=>showScreen("login"));
+  $("#forgotBack")?.addEventListener("click",()=>{if($("#forgotSuccess"))$("#forgotSuccess").hidden=true;if($("#forgotFields"))$("#forgotFields").hidden=false;showScreen("login")});
+  $("#goLoginFromSignup")?.addEventListener("click",()=>showScreen("login"));
+  $("#forgotDoneBtn")?.addEventListener("click",()=>{if($("#forgotSuccess"))$("#forgotSuccess").hidden=true;if($("#forgotFields"))$("#forgotFields").hidden=false;showScreen("login")});
+
+  // Signup
+  const signupForm=$("#signupForm"),signupErr=$("#signupErr"),signupSubmit=$("#signupSubmit");
+  signupForm?.addEventListener("submit",async e=>{e.preventDefault();setErr(signupErr,"");const name=$("#signupName")?.value.trim(),email=$("#signupEmail")?.value.trim(),password=$("#signupPassword")?.value||"",confirm=$("#signupConfirm")?.value||"";if(!name)return setErr(signupErr,"Isi nama dulu.");if(!email)return setErr(signupErr,"Isi email dulu.");if(password.length<8)return setErr(signupErr,"Password minimal 8 karakter.");if(password!==confirm)return setErr(signupErr,"Password dan konfirmasi tidak sama.");busyBtn(signupSubmit,true,"Daftar");try{const r=await fetch("/api/auth/signup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,email,password})});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||"Gagal daftar.");if(data.otp){pendingEmail=email;startOtpScreen(data)}else{setAccountIdentity(email);enterChat()}}catch(err){setErr(signupErr,err.message||"Gagal daftar.")}busyBtn(signupSubmit,false,"Daftar")});
+
+  // Forgot password
+  const forgotForm=$("#forgotForm"),forgotErr=$("#forgotErr"),forgotSubmit=$("#forgotSubmit");
+  forgotForm?.addEventListener("submit",async e=>{e.preventDefault();setErr(forgotErr,"");const email=$("#forgotEmail")?.value.trim();if(!email)return setErr(forgotErr,"Isi email dulu.");busyBtn(forgotSubmit,true,"Kirim link reset");try{const r=await fetch("/api/auth/forgot",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||"Gagal kirim.");if($("#forgotFields"))$("#forgotFields").hidden=true;if($("#forgotSuccess"))$("#forgotSuccess").hidden=false}catch(err){setErr(forgotErr,err.message||"Gagal kirim.")}busyBtn(forgotSubmit,false,"Kirim link reset")});
 
   const otpEmailShown=$("#otpEmailShown"),otpRow=$("#otpRow"),otpInputs=[...otpRow.querySelectorAll("input")],otpErr=$("#otpErr"),devHint=$("#devHint"),otpSubmit=$("#otpSubmit"),otpSuccess=$("#otpSuccess"),resendBtn=$("#resendBtn"),resendTimer=$("#resendTimer"),otpBack=$("#otpBack");let resendCooldownId=null;
   function startOtpScreen(data){otpEmailShown.textContent=pendingEmail;setErr(otpErr,"");devHint.innerHTML=data?.devOtp?`<div class="dev-hint">Mode dev — kode kamu: <b>${esc(data.devOtp)}</b></div>`:"";otpInputs.forEach(i=>{i.value="";i.classList.remove("filled")});showScreen("otp");otpInputs[0].focus();runResendCooldown(30)}
@@ -954,7 +1084,7 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
   thread.addEventListener("click",async e=>{const t=e.target.closest("button");if(!t)return;if(t.matches('[data-retry]')){request();return}if(t.matches('[data-copy-code]')){const id=t.dataset.copyCode,el=document.getElementById(id);if(el)await copyText(el.textContent,t);return}if(t.matches('[data-copy-answer]')){const m=messages[+t.dataset.copyAnswer];if(m)await copyText(m.content,t);return}if(t.matches('[data-copy-artifact]')){const code=artifactStore.get(t.dataset.copyArtifact)||"";await copyText(code,t);return}if(t.matches('[data-open-artifact]')){const code=artifactStore.get(t.dataset.openArtifact)||"";const w=window.open();if(w){w.document.open();w.document.write(code);w.document.close()}return}if(t.matches('[data-artifact-tab]')){const card=t.closest('.bm-artifact');const code=t.dataset.artifactTab==='code';card.classList.toggle('show-source',code);$$('[data-artifact-tab]',card).forEach(x=>x.classList.toggle('active',x.dataset.artifactTab===t.dataset.artifactTab))}});
   async function copyText(text,btn){try{await navigator.clipboard.writeText(text);const old=btn.textContent;btn.textContent='Tersalin';setTimeout(()=>btn.textContent=old,1200)}catch(_){toast('Clipboard nggak tersedia di browser ini')}}
 
-  async function doLogout(){try{await fetch("/api/auth/logout",{method:"POST"})}catch(_){}currentUserEmail="";currentChatId=null;messages=[];error=null;busy=false;attachments=[];renderAttachments();try{localStorage.removeItem(STORE)}catch(_){}const card=otpSubmit.closest('.otp-card');card.classList.remove('successing');otpSuccess.setAttribute('aria-hidden','true');showScreen('login');loginForm.reset();setErr(loginErr,"")}
+  async function doLogout(){try{await fetch("/api/auth/logout",{method:"POST"})}catch(_){}currentUserEmail="";currentChatId=null;messages=[];error=null;busy=false;attachments=[];renderAttachments();try{localStorage.removeItem(STORE)}catch(_){}const card=otpSubmit.closest('.otp-card');card.classList.remove('successing');otpSuccess.setAttribute('aria-hidden','true');showScreen('login');loginForm.reset();if(loginPassword)loginPassword.type="password";setErr(loginErr,"")}
 
   /* ---------- API Keys (buat akses /api/v1/chat/completions dari OpenCode dkk) ---------- */
   const apiKeysOverlay=$("#apiKeysOverlay"),apiKeyForm=$("#apiKeyForm"),apiKeyLabel=$("#apiKeyLabel"),apiKeyCreateBtn=$("#apiKeyCreateBtn"),apiKeyNewBox=$("#apiKeyNewBox"),apiKeyNewValue=$("#apiKeyNewValue"),apiKeyList=$("#apiKeyList"),apiBaseUrl=$("#apiBaseUrl");
