@@ -1,31 +1,21 @@
-// api/auth/login.js — kirim OTP ke email (publik, siapa aja boleh daftar pake email sendiri)
-import { issueOtp, sendOtpEmail } from "../../lib/session.js";
+// api/auth/login.js — login dengan email + password
+import { checkPassword, signSession, setSessionCookie } from "../../lib/session.js";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Metode tidak diizinkan." });
-  }
+  if (req.method !== "POST") return res.status(405).json({ error: "Metode tidak diizinkan." });
 
-  const { email } = req.body || {};
+  const { email, password } = req.body || {};
   const cleanEmail = String(email || "").trim().toLowerCase();
 
-  if (!EMAIL_RE.test(cleanEmail)) {
-    return res.status(400).json({ error: "Format email tidak valid." });
-  }
+  if (!EMAIL_RE.test(cleanEmail)) return res.status(400).json({ error: "Format email tidak valid." });
+  if (!password || String(password).length < 1) return res.status(400).json({ error: "Password tidak boleh kosong." });
 
-  const issued = await issueOtp(cleanEmail);
-  if (issued.cooldown) {
-    return res.status(429).json({ error: `Tunggu ${issued.cooldown} detik sebelum minta kode lagi.` });
-  }
+  const result = await checkPassword(cleanEmail, String(password));
+  if (!result.ok) return res.status(401).json({ error: result.reason });
 
-  const { sent } = await sendOtpEmail(cleanEmail, issued.otp);
-
-  const payload = { ok: true, sent };
-  if (!sent) {
-    // Mode dev: RESEND_API_KEY belum diisi, jadi OTP dibalikin langsung biar bisa dites.
-    payload.devOtp = issued.otp;
-  }
-  return res.status(200).json(payload);
+  const token = signSession(cleanEmail);
+  setSessionCookie(res, token);
+  return res.status(200).json({ ok: true, email: cleanEmail, name: result.user?.name || "" });
 }
