@@ -822,10 +822,11 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
 <script>
 (() => {
   const STORE="bm-ai-chat-v2", THEME_STORE="bm-ai-theme", AGENT_STORE="bm-ai-agent", ASSET_STORE="bm-ai-assets", CHATS_STORE="bm-ai-chats-v1";
-  let currentChatId=null, chatSortNewest=true;
+  let currentUserEmail="", currentChatId=null, chatSortNewest=true;
+  function chatsKey(){return currentUserEmail?CHATS_STORE+"::"+currentUserEmail:CHATS_STORE+"::__anon"}
   function genChatId(){return "chat-"+Date.now()+"-"+Math.random().toString(36).slice(2,6)}
-  function loadAllChats(){try{return JSON.parse(localStorage.getItem(CHATS_STORE)||"[]")}catch(_){return []}}
-  function saveAllChats(chats){try{localStorage.setItem(CHATS_STORE,JSON.stringify(chats.slice(0,120)))}catch(_){}}
+  function loadAllChats(){try{return JSON.parse(localStorage.getItem(chatsKey())||"[]")}catch(_){return []}}
+  function saveAllChats(chats){try{localStorage.setItem(chatsKey(),JSON.stringify(chats.slice(0,120)))}catch(_){}}
   function getChatTitle(msgs){const m=msgs.find(x=>x.role==="user");return m?m.content.replace(/\n/g," ").trim().slice(0,50)||"Untitled":"Untitled"}
   function saveCurrentChat(){if(!messages.length)return;const chats=loadAllChats();if(!currentChatId)currentChatId=genChatId();const idx=chats.findIndex(c=>c.id===currentChatId);const entry={id:currentChatId,title:getChatTitle(messages),messages:messages.slice(-60),updatedAt:Date.now()};if(idx>=0)chats[idx]=entry;else chats.unshift(entry);saveAllChats(chats);renderChatList()}
   function renderChatList(){const el=$("#chatList");if(!el)return;const chats=loadAllChats();if(!chats.length){el.innerHTML='<div class="bm-chat-empty">Belum ada chat.</div>';return}const list=chatSortNewest?[...chats]:[...chats].reverse();el.innerHTML=list.map(c=>`<button class="bm-chat-item${c.id===currentChatId?" active":""}" type="button" data-chat-id="${esc(c.id)}">${esc(c.title)}</button>`).join("")}
@@ -953,7 +954,7 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
   thread.addEventListener("click",async e=>{const t=e.target.closest("button");if(!t)return;if(t.matches('[data-retry]')){request();return}if(t.matches('[data-copy-code]')){const id=t.dataset.copyCode,el=document.getElementById(id);if(el)await copyText(el.textContent,t);return}if(t.matches('[data-copy-answer]')){const m=messages[+t.dataset.copyAnswer];if(m)await copyText(m.content,t);return}if(t.matches('[data-copy-artifact]')){const code=artifactStore.get(t.dataset.copyArtifact)||"";await copyText(code,t);return}if(t.matches('[data-open-artifact]')){const code=artifactStore.get(t.dataset.openArtifact)||"";const w=window.open();if(w){w.document.open();w.document.write(code);w.document.close()}return}if(t.matches('[data-artifact-tab]')){const card=t.closest('.bm-artifact');const code=t.dataset.artifactTab==='code';card.classList.toggle('show-source',code);$$('[data-artifact-tab]',card).forEach(x=>x.classList.toggle('active',x.dataset.artifactTab===t.dataset.artifactTab))}});
   async function copyText(text,btn){try{await navigator.clipboard.writeText(text);const old=btn.textContent;btn.textContent='Tersalin';setTimeout(()=>btn.textContent=old,1200)}catch(_){toast('Clipboard nggak tersedia di browser ini')}}
 
-  async function doLogout(){try{await fetch("/api/auth/logout",{method:"POST"})}catch(_){}messages=[];error=null;busy=false;attachments=[];renderAttachments();try{localStorage.removeItem(STORE)}catch(_){}const card=otpSubmit.closest('.otp-card');card.classList.remove('successing');otpSuccess.setAttribute('aria-hidden','true');showScreen('login');loginForm.reset();setErr(loginErr,"")}
+  async function doLogout(){try{await fetch("/api/auth/logout",{method:"POST"})}catch(_){}currentUserEmail="";currentChatId=null;messages=[];error=null;busy=false;attachments=[];renderAttachments();try{localStorage.removeItem(STORE)}catch(_){}const card=otpSubmit.closest('.otp-card');card.classList.remove('successing');otpSuccess.setAttribute('aria-hidden','true');showScreen('login');loginForm.reset();setErr(loginErr,"")}
 
   /* ---------- API Keys (buat akses /api/v1/chat/completions dari OpenCode dkk) ---------- */
   const apiKeysOverlay=$("#apiKeysOverlay"),apiKeyForm=$("#apiKeyForm"),apiKeyLabel=$("#apiKeyLabel"),apiKeyCreateBtn=$("#apiKeyCreateBtn"),apiKeyNewBox=$("#apiKeyNewBox"),apiKeyNewValue=$("#apiKeyNewValue"),apiKeyList=$("#apiKeyList"),apiBaseUrl=$("#apiBaseUrl");
@@ -1045,6 +1046,11 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
 
   function setAccountIdentity(email){
     if(!email)return;
+    // Reset chat state if switching to a different user
+    if(currentUserEmail && currentUserEmail!==email){
+      currentChatId=null;messages=[];error=null;attachments=[];
+    }
+    currentUserEmail=email;
     accountMenuEmail.textContent=email;
     const raw=email.split('@')[0].replace(/[._-]/g,' ');
     const name=raw.split(' ').map(w=>w?w[0].toUpperCase()+w.slice(1):'').join(' ').trim()||email.split('@')[0];
