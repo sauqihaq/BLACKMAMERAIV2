@@ -802,6 +802,44 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
   </div>
 </section>
 
+<!-- ================= RESET PASSWORD ================= -->
+<section class="stage" id="screen-reset" hidden>
+  <form class="card" id="resetForm" novalidate>
+    <div class="card-mark">BlackMamer <b>AI</b></div>
+    <h1>Password baru</h1>
+    <p class="lede" id="resetLede">Masukin password baru kamu.</p>
+    <div id="resetErr"></div>
+    <div id="resetFields">
+      <div class="field">
+        <label for="resetPassword">Password baru</label>
+        <div class="box">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2.2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="currentColor" stroke-width="1.8"/></svg>
+          <input id="resetPassword" type="password" autocomplete="new-password" placeholder="Minimal 8 karakter" required>
+          <button type="button" class="eye" id="resetEye" aria-label="Tampilkan password">
+            <svg id="resetEyeIcon" viewBox="0 0 24 24" fill="none"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="2.8" stroke="currentColor" stroke-width="1.7"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="resetConfirm">Konfirmasi password</label>
+        <div class="box">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><rect x="5" y="10.5" width="14" height="9.5" rx="2.2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="currentColor" stroke-width="1.8"/></svg>
+          <input id="resetConfirm" type="password" autocomplete="new-password" placeholder="Ulangi password" required>
+        </div>
+      </div>
+      <button class="btn-gold" id="resetSubmit" type="submit"><span>Simpan password baru</span></button>
+    </div>
+    <div id="resetInvalid" hidden style="text-align:center;padding:.5rem 0;">
+      <div class="forgot-success-icon" style="background:rgba(226,121,90,.15);border-color:rgba(226,121,90,.3);color:var(--danger);">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <strong style="font-size:1.05rem;color:var(--ink);display:block;margin-bottom:.4rem;">Link tidak valid</strong>
+      <p style="color:var(--muted);font-size:.88rem;margin:0 0 1.2rem;line-height:1.5">Link sudah kedaluwarsa atau sudah dipakai. Minta reset password lagi.</p>
+      <button type="button" class="btn-gold" id="resetBackBtn"><span>Kembali ke lupa password</span></button>
+    </div>
+  </form>
+</section>
+
 <!-- ================= CHAT / WORKSPACE ================= -->
 <div id="screen-chat" hidden>
   <div class="bm-workspace">
@@ -955,9 +993,9 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
   applyTheme(savedTheme==="light"?"light":"dark");
   themeSwitch?.addEventListener("click",()=>{const n=html.dataset.theme==="light"?"dark":"light";applyTheme(n);try{localStorage.setItem(THEME_STORE,n)}catch(_){} });
 
-  const flowBg=$("#flowBg"), screens={login:$("#screen-login"),otp:$("#screen-otp"),signup:$("#screen-signup"),forgot:$("#screen-forgot"),chat:$("#screen-chat")};
+  const flowBg=$("#flowBg"), screens={login:$("#screen-login"),otp:$("#screen-otp"),signup:$("#screen-signup"),forgot:$("#screen-forgot"),reset:$("#screen-reset"),chat:$("#screen-chat")};
   let screenMotionTimer=null;
-  function showScreen(name){clearTimeout(screenMotionTimer);Object.entries(screens).forEach(([k,el])=>{const active=k===name;el.hidden=!active;el.classList.remove("screen-motion-in");if(active){void el.offsetWidth;el.classList.add("screen-motion-in")}});flowBg?.classList.toggle("on",["login","otp","signup","forgot"].includes(name));screenMotionTimer=setTimeout(()=>screens[name]?.classList.remove("screen-motion-in"),900)}
+  function showScreen(name){clearTimeout(screenMotionTimer);Object.entries(screens).forEach(([k,el])=>{const active=k===name;el.hidden=!active;el.classList.remove("screen-motion-in");if(active){void el.offsetWidth;el.classList.add("screen-motion-in")}});flowBg?.classList.toggle("on",["login","otp","signup","forgot","reset"].includes(name));screenMotionTimer=setTimeout(()=>screens[name]?.classList.remove("screen-motion-in"),900)}
   showScreen("login");
 
   const loginForm=$("#loginForm"),loginEmail=$("#loginEmail"),loginPassword=$("#loginPassword"),loginSubmit=$("#loginSubmit"),loginErr=$("#loginErr");let pendingEmail="";
@@ -986,7 +1024,21 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
 
   // Forgot password
   const forgotForm=$("#forgotForm"),forgotErr=$("#forgotErr"),forgotSubmit=$("#forgotSubmit");
-  forgotForm?.addEventListener("submit",async e=>{e.preventDefault();setErr(forgotErr,"");const email=$("#forgotEmail")?.value.trim();if(!email)return setErr(forgotErr,"Isi email dulu.");busyBtn(forgotSubmit,true,"Kirim link reset");try{const r=await fetch("/api/auth/forgot",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||"Gagal kirim.");if($("#forgotFields"))$("#forgotFields").hidden=true;if($("#forgotSuccess"))$("#forgotSuccess").hidden=false}catch(err){setErr(forgotErr,err.message||"Gagal kirim.")}busyBtn(forgotSubmit,false,"Kirim link reset")});
+  forgotForm?.addEventListener("submit",async e=>{e.preventDefault();setErr(forgotErr,"");const email=$("#forgotEmail")?.value.trim();if(!email)return setErr(forgotErr,"Isi email dulu.");busyBtn(forgotSubmit,true,"Kirim link reset");try{const r=await fetch("/api/auth/forgot",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||"Gagal kirim.");if($("#forgotFields"))$("#forgotFields").hidden=true;if($("#forgotSuccess"))$("#forgotSuccess").hidden=false;// Dev mode: tampilkan URL reset langsung
+if(data.devResetUrl){const hint=document.createElement("div");hint.className="dev-hint";hint.innerHTML=`Mode dev — <a href="${esc(data.devResetUrl)}" style="color:var(--gold-bright)">${esc(data.devResetUrl)}</a>`;$("#forgotSuccess")?.prepend(hint);}}catch(err){setErr(forgotErr,err.message||"Gagal kirim.")}busyBtn(forgotSubmit,false,"Kirim link reset")});
+
+  // Reset password form
+  makeEye("#resetEye","#resetEyeIcon","#resetPassword");
+  let resetToken="";
+  const resetForm=$("#resetForm"),resetErr=$("#resetErr"),resetSubmit=$("#resetSubmit");
+  resetForm?.addEventListener("submit",async e=>{e.preventDefault();setErr(resetErr,"");const password=$("#resetPassword")?.value||"",confirm=$("#resetConfirm")?.value||"";if(password.length<8)return setErr(resetErr,"Password minimal 8 karakter.");if(password!==confirm)return setErr(resetErr,"Password dan konfirmasi tidak sama.");busyBtn(resetSubmit,true,"Simpan password baru");try{const r=await fetch("/api/auth/reset",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token:resetToken,password})});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||"Gagal reset.");setAccountIdentity(data.email);enterChat()}catch(err){setErr(resetErr,err.message||"Gagal reset.")}busyBtn(resetSubmit,false,"Simpan password baru")});
+  $("#resetBackBtn")?.addEventListener("click",()=>{if($("#resetInvalid"))$("#resetInvalid").hidden=true;if($("#resetFields"))$("#resetFields").hidden=false;showScreen("forgot")});
+
+  // Cek URL token saat halaman dibuka (dari link email reset)
+  function checkResetToken(){const params=new URLSearchParams(location.search);const token=params.get("token");if(!token)return false;resetToken=token;// Validasi token dulu sebelum tampil
+fetch("/api/auth/reset-check",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token})}).then(r=>r.json()).then(data=>{if(data.ok){showScreen("reset")}else{if($("#resetFields"))$("#resetFields").hidden=true;if($("#resetInvalid"))$("#resetInvalid").hidden=false;showScreen("reset")}}).catch(()=>{showScreen("reset")});return true;}
+
+  if(!checkResetToken()){
 
   const otpEmailShown=$("#otpEmailShown"),otpRow=$("#otpRow"),otpInputs=[...otpRow.querySelectorAll("input")],otpErr=$("#otpErr"),devHint=$("#devHint"),otpSubmit=$("#otpSubmit"),otpSuccess=$("#otpSuccess"),resendBtn=$("#resendBtn"),resendTimer=$("#resendTimer"),otpBack=$("#otpBack");let resendCooldownId=null;
   function startOtpScreen(data){otpEmailShown.textContent=pendingEmail;setErr(otpErr,"");devHint.innerHTML=data?.devOtp?`<div class="dev-hint">Mode dev — kode kamu: <b>${esc(data.devOtp)}</b></div>`:"";otpInputs.forEach(i=>{i.value="";i.classList.remove("filled")});showScreen("otp");otpInputs[0].focus();runResendCooldown(30)}
@@ -1262,6 +1314,7 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
 
   loadMessages();render();fit();renderChatList();
   (async()=>{try{const r=await fetch('/api/auth/me');if(r.ok){const data=await r.json().catch(()=>({}));if(data.email)setAccountIdentity(data.email);enterChat();return}}catch(_){}showScreen('login')})();
+  }
 })();
 </script>
 </body>
