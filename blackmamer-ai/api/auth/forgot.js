@@ -13,12 +13,21 @@ export default async function handler(req, res) {
 
   const result = await issueResetToken(cleanEmail);
 
-  if (result.ok && result.token) {
-    const baseUrl  = process.env.APP_URL || `https://${req.headers.host}`;
-    const resetUrl = `${baseUrl}/reset-password?token=${result.token}`;
-    await sendEmail(cleanEmail, "Reset password BlackMamer AI", RESET_EMAIL_HTML(resetUrl));
+  // Email tidak terdaftar — tetap balas ok (security: jangan kasih hint)
+  if (!result.ok || !result.token) {
+    return res.status(200).json({ ok: true });
   }
 
-  // Selalu balas ok — jangan kasih tau email terdaftar atau tidak (security)
-  return res.status(200).json({ ok: true });
+  const baseUrl  = process.env.APP_URL || `https://${req.headers.host}`;
+  const resetUrl = `${baseUrl}/reset-password?token=${result.token}`;
+  const { sent } = await sendEmail(cleanEmail, "Reset password BlackMamer AI", RESET_EMAIL_HTML(resetUrl));
+
+  const payload = { ok: true };
+
+  // Mode dev: kalau email provider belum dikonfig, balikkin URL-nya langsung
+  if (!sent) {
+    payload.devResetUrl = resetUrl;
+  }
+
+  return res.status(200).json(payload);
 }
