@@ -2,5 +2,9 @@
   "functions": {
     "api/chat.js": { "maxDuration": 60 },
     "api/v1/chat/completions.js": { "maxDuration": 60 }
-  }
+  },
+  "rewrites": [
+    { "source": "/reset-password", "destination": "/index.html" },
+    { "source": "/reset-password/(.*)", "destination": "/index.html" }
+  ]
 }
