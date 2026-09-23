@@ -635,7 +635,63 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
 @media(max-width:900px){.bm-workspace{grid-template-columns:210px minmax(0,1fr)}.bm-content,.bm-dock-inner{width:min(100% - 22px,900px)}.bm-artifact-body{grid-template-columns:1fr}.bm-artifact-source{border-left:0;border-top:1px solid var(--line)}.bm-local-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:720px){.bm-sidebar{display:none}.bm-workspace{grid-template-columns:1fr}.bm-mobile-menu{display:grid;width:34px;height:34px;place-items:center;border:1px solid var(--line);border-radius:10px;background:var(--panel-soft-2);color:var(--text)}.bm-topbar{height:58px;padding:.7rem}.bm-content{width:min(100% - 16px,900px);padding-top:1rem}.bm-empty{min-height:calc(100dvh - 58px);padding-bottom:7rem}.bm-empty h1{font-size:2rem}.bm-local-grid{grid-template-columns:1fr}.bm-top-actions .bm-top-btn:first-child{display:none}.bm-user-bubble{max-width:94%}.bm-composer-left{overflow-x:auto}.bm-mini{flex:none}.bm-artifact-body{min-height:300px}.bm-artifact-preview iframe{min-height:300px}}
 @media(prefers-reduced-motion:reduce){.bm-orb,.bm-orb::before,.bm-orb::after,.bm-message,.bm-typing-dots i{animation:none}.bm-message{opacity:1}}
+
+/* ================= BLACKMAMER LANDING PAGE ================= */
+#screen-landing{position:relative;min-height:100dvh;width:100%;overflow:hidden;background:#09060d;color:var(--ink)}
+#screen-landing::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 70% 48% at 50% 78%,rgba(137,74,255,.23),transparent 62%),radial-gradient(circle at 50% 35%,rgba(94,47,164,.13),transparent 42%),linear-gradient(180deg,#08050c 0%,#0b0711 48%,#120b1c 100%)}
+#screen-landing::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.28;background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:72px 72px;mask-image:linear-gradient(to bottom,black,transparent 88%)}
+.landing-container{position:relative;z-index:2;width:min(1380px,calc(100% - 48px));min-height:100dvh;margin:0 auto;display:flex;flex-direction:column}
+.landing-navbar{height:82px;display:flex;align-items:center;justify-content:space-between;gap:30px;position:relative;z-index:20}
+.landing-logo{display:flex;align-items:center;gap:10px;border:0;padding:0;background:transparent;color:var(--ink);cursor:pointer;font-family:var(--f-display);font-size:16px;font-weight:800}
+.landing-logo-icon{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(145deg,#f7d58f,#d9ad5c 55%,#8b6427);color:#171007;font-size:10px;font-weight:900;box-shadow:0 0 28px rgba(217,173,92,.28)}
+.landing-logo-text span{color:var(--gold-bright)}
+.landing-nav-links{display:flex;align-items:center;gap:28px;margin-left:auto;margin-right:15px}
+.landing-nav-links button{border:0;background:transparent;color:rgba(255,255,255,.55);cursor:pointer;font-family:var(--f-body);font-size:12px;font-weight:600;transition:color .2s ease}
+.landing-nav-links button:hover{color:#fff}
+.landing-nav-actions{display:flex;align-items:center;gap:8px}
+.landing-nav-login,.landing-nav-signup{border-radius:999px;padding:9px 15px;cursor:pointer;font-size:11px;font-weight:700;transition:.2s ease}
+.landing-nav-login{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.055);color:#fff}
+.landing-nav-login:hover{border-color:rgba(255,255,255,.3);transform:translateY(-1px)}
+.landing-nav-signup{border:1px solid rgba(255,255,255,.8);background:#fff;color:#17121d}
+.landing-nav-signup:hover{transform:translateY(-1px);box-shadow:0 10px 30px rgba(255,255,255,.12)}
+
+/* Centered hero with BlackMamer black/gold glow */
+.landing-hero{position:relative;flex:1;min-height:calc(100dvh - 82px);height:calc(100dvh - 82px);display:flex;flex-direction:column;align-items:center;text-align:center;overflow:hidden;padding-top:36px}
+.landing-content{position:relative;z-index:8;width:min(850px,100%);display:flex;flex-direction:column;align-items:center;padding:0 10px;pointer-events:none}.landing-content button{pointer-events:auto}
+.landing-badge{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border:1px solid rgba(255,255,255,.16);border-radius:999px;background:rgba(255,255,255,.055);color:rgba(255,255,255,.9);font-size:10px;font-weight:700;box-shadow:0 12px 35px -20px rgba(217,173,92,.8);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.landing-badge-dot{width:6px;height:6px;border-radius:50%;background:#f2cc86;box-shadow:0 0 14px #d9ad5c;animation:landing-pulse 2.2s ease-in-out infinite}
+.landing-title{margin:18px 0 12px;max-width:900px;font-family:var(--f-display);font-size:clamp(43px,5.4vw,78px);line-height:.95;letter-spacing:-.055em;font-weight:800;text-shadow:0 12px 45px rgba(217,173,92,.16)}
+.landing-title .line{display:block}.landing-title .gold{background:linear-gradient(100deg,#fff 5%,#f5e6c5 48%,#d9ad5c 85%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.landing-description{max-width:620px;margin:0;color:rgba(255,255,255,.56);font-size:clamp(12px,1.05vw,15px);line-height:1.65}
+.landing-buttons{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:20px;flex-wrap:wrap}
+.landing-start-btn,.landing-view-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:12px 18px;cursor:pointer;font-size:11px;font-weight:800;transition:.22s ease}
+.landing-start-btn{border:0;background:#fff;color:#17121d;box-shadow:0 18px 50px -20px rgba(255,255,255,.55)}
+.landing-start-btn:hover{transform:translateY(-2px);box-shadow:0 22px 55px -18px rgba(255,255,255,.7)}
+.landing-view-btn{border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.045);color:#fff;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.landing-view-btn:hover{border-color:rgba(242,204,134,.55);background:rgba(217,173,92,.09)}
+.landing-note{display:none}
+
+.landing-3d{position:absolute;z-index:2;inset:0;width:100vw;height:100%;margin:0;display:flex;align-items:center;justify-content:center;overflow:hidden;isolation:isolate;pointer-events:none}
+/* Huge animated gold dome behind the robot */
+.landing-3d-glow{position:absolute;z-index:0;left:50%;top:12%;width:min(1500px,110vw);height:min(900px,78vw);transform:translateX(-50%);border-radius:52% 52% 0 0 / 68% 68% 0 0;background:radial-gradient(ellipse at 50% 92%,rgba(242,204,134,.42) 0%,rgba(217,173,92,.23) 25%,rgba(138,111,61,.12) 48%,transparent 73%);filter:blur(10px);pointer-events:none;animation:landing-glow-breathe 5s ease-in-out infinite}
+.landing-3d-glow::before{content:"";position:absolute;left:50%;top:13%;width:90%;height:72%;transform:translateX(-50%);border-radius:50% 50% 0 0 / 75% 75% 0 0;border:1px solid rgba(245,230,197,.18);box-shadow:0 0 28px rgba(217,173,92,.42),0 0 90px rgba(166,126,49,.22),inset 0 14px 40px rgba(242,204,134,.12);animation:landing-arc-shimmer 4.2s ease-in-out infinite}
+.landing-3d-glow::after{content:"";position:absolute;left:50%;bottom:0;width:76%;height:42%;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse,rgba(217,173,92,.28),rgba(138,111,61,.11) 42%,transparent 72%);filter:blur(22px);animation:landing-floor-glow 4s ease-in-out infinite}
+.landing-3d-ring{position:absolute;z-index:1;left:50%;top:18%;width:min(1420px,104vw);height:min(800px,70vw);transform:translateX(-50%);border-radius:50% 50% 0 0 / 78% 78% 0 0;border:1px solid rgba(217,173,92,.11);border-bottom:0;pointer-events:none;box-shadow:0 -2px 35px rgba(217,173,92,.13)}
+.landing-3d-ring::before{content:"";position:absolute;inset:8% 7% 0;border-radius:50% 50% 0 0 / 78% 78% 0 0;border:1px solid rgba(242,204,134,.055);border-bottom:0}
+.landing-spline{position:relative;z-index:4;width:100vw;height:100%;border:0;display:block;background:transparent;filter:drop-shadow(0 35px 70px rgba(0,0,0,.62));transform:scale(1.22) translateY(3%);transform-origin:center center;pointer-events:auto}
+.landing-info-card{display:none}
+@keyframes landing-pulse{0%,100%{opacity:.75;transform:scale(.85);box-shadow:0 0 10px #d9ad5c}50%{opacity:1;transform:scale(1.15);box-shadow:0 0 20px #f2cc86}}
+@keyframes landing-glow-breathe{0%,100%{opacity:.8;transform:translateX(-50%) scaleX(.98)}50%{opacity:1;transform:translateX(-50%) scaleX(1.02)}}
+@keyframes landing-arc-shimmer{0%,100%{opacity:.65;filter:brightness(.9)}50%{opacity:1;filter:brightness(1.35)}}
+@keyframes landing-floor-glow{0%,100%{opacity:.55;transform:translateX(-50%) scale(1)}50%{opacity:.9;transform:translateX(-50%) scale(1.08)}}
+.landing-footer{position:absolute;left:0;right:0;bottom:0;z-index:10;min-height:48px;display:flex;align-items:center;justify-content:center;padding:8px 0;border-top:1px solid rgba(255,255,255,.055);color:rgba(255,255,255,.38);font-size:9px}.landing-footer-items{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:center;margin-left:12px}.landing-footer-item{padding:5px 8px;border:1px solid rgba(255,255,255,.06);border-radius:999px;background:rgba(255,255,255,.02)}
+#screen-landing.screen-motion-in .landing-content{animation:landing-content-in .8s cubic-bezier(.16,1,.3,1) both}#screen-landing.screen-motion-in .landing-3d{animation:landing-3d-in 1s .08s cubic-bezier(.16,1,.3,1) both}
+@keyframes landing-content-in{from{opacity:0;transform:translateY(-18px);filter:blur(7px)}to{opacity:1;transform:none;filter:none}}@keyframes landing-3d-in{from{opacity:0;transform:translateY(28px) scale(.96);filter:blur(7px)}to{opacity:1;transform:none;filter:none}}
+@media (max-width:1000px){.landing-container{width:min(100% - 30px,1380px)}.landing-nav-links{display:none}.landing-hero{padding-top:25px;height:calc(100dvh - 68px);min-height:calc(100dvh - 68px)}.landing-content{max-width:760px}.landing-3d{inset:0;width:100vw;height:100%}.landing-spline{width:100vw;height:100%;transform:scale(1.18) translateY(3%)}.landing-3d-glow{top:14%;width:1200px;height:650px}.landing-3d-ring{top:18%;width:1120px;height:610px}.landing-footer{position:absolute;left:0;right:0;bottom:0;margin:0;z-index:9}}
+@media (max-width:600px){.landing-container{width:calc(100% - 20px)}.landing-navbar{height:68px}.landing-nav-login{display:none}.landing-title{font-size:clamp(38px,12vw,58px);line-height:.96}.landing-description{font-size:12px;max-width:330px}.landing-buttons{margin-top:17px}.landing-start-btn,.landing-view-btn{padding:11px 15px;font-size:10px}.landing-3d{inset:0;width:100vw;height:100%}.landing-spline{width:100vw;height:100%;transform:scale(1.08) translateY(2%)}.landing-3d-glow{top:17%;width:900px;height:520px}.landing-3d-ring{top:21%;width:820px;height:450px}.landing-footer{font-size:8px}.landing-footer-items{display:none}}
+@media (prefers-reduced-motion:reduce){.landing-badge-dot,.landing-3d-glow,.landing-3d-glow::before,.landing-3d-glow::after,#screen-landing.screen-motion-in .landing-content,#screen-landing.screen-motion-in .landing-3d{animation:none!important}}
 </style>
+<script type="module" src="https://cdn.spline.design/@splinetool/viewer@2.0.55/build/spline-viewer.js"></script>
 </head>
 <body class="dark">
 
@@ -647,6 +703,51 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
     <svg id="themeIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.3" stroke="currentColor" stroke-width="2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
   </span>
 </button>
+
+<!-- ================= LANDING ================= -->
+<section id="screen-landing" hidden>
+  <div class="landing-container">
+    <header class="landing-navbar">
+      <button class="landing-logo" id="landingLogo" type="button">
+        <span class="landing-logo-icon">BM</span>
+        <span class="landing-logo-text">BlackMamer <span>AI</span></span>
+      </button>
+      <nav class="landing-nav-links" aria-label="Landing navigation">
+        <button type="button" data-landing-scroll="landingHero">Home</button>
+        <button type="button" data-landing-scroll="landingFeatures">Features</button>
+        <button type="button" data-landing-scroll="landing3D">3D Experience</button>
+      </nav>
+      <div class="landing-nav-actions">
+        <button class="landing-nav-login" id="landingLogin" type="button">Login</button>
+        <button class="landing-nav-signup" id="landingSignup" type="button">Daftar</button>
+      </div>
+    </header>
+    <main class="landing-hero" id="landingHero">
+      <div class="landing-content">
+        <div class="landing-badge"><span class="landing-badge-dot"></span>BLACKMAMER AI · PRIVATE AI WORKSPACE</div>
+        <h1 class="landing-title"><span class="line">Your AI.</span><span class="line gold">Your workspace.</span></h1>
+        <p class="landing-description">Chat, coding, files, ideas, dan project dalam satu AI workspace yang dibuat untuk workflow lu.</p>
+        <div class="landing-buttons">
+          <button class="landing-start-btn" id="landingStart" type="button">Mulai dengan BlackMamer <span>→</span></button>
+          <button class="landing-view-btn" id="landingView3D" type="button">Explore 3D <span>↓</span></button>
+        </div>
+        <div class="landing-note"><span class="landing-note-line"></span>Login diperlukan untuk masuk ke workspace.</div>
+      </div>
+      <div class="landing-3d" id="landing3D">
+        <div class="landing-3d-glow"></div>
+        <div class="landing-3d-ring"></div>
+        <!-- IMPORTANT: ganti URL ini dengan URL scene.splinecode milik scene robot lu jika berbeda. -->
+        <spline-viewer class="landing-spline" id="blackmamerSpline" url="https://prod.spline.design/DdGwl9iK8pBkcGlm/scene.splinecode"></spline-viewer>
+      </div>
+    </main>
+    <footer class="landing-footer" id="landingFeatures">
+      <span>BLACKMAMER AI</span>
+      <div class="landing-footer-items">
+        <span class="landing-footer-item">Chat</span><span class="landing-footer-item">Coding</span><span class="landing-footer-item">Files</span><span class="landing-footer-item">Projects</span><span class="landing-footer-item">AI Agents</span>
+      </div>
+    </footer>
+  </div>
+</section>
 
 <!-- ================= LOGIN ================= -->
 <section class="stage" id="screen-login">
@@ -993,10 +1094,19 @@ html[data-theme="light"] .bm-model-btn,html[data-theme="light"] .bm-top-btn,html
   applyTheme(savedTheme==="light"?"light":"dark");
   themeSwitch?.addEventListener("click",()=>{const n=html.dataset.theme==="light"?"dark":"light";applyTheme(n);try{localStorage.setItem(THEME_STORE,n)}catch(_){} });
 
-  const flowBg=$("#flowBg"), screens={login:$("#screen-login"),otp:$("#screen-otp"),signup:$("#screen-signup"),forgot:$("#screen-forgot"),reset:$("#screen-reset"),chat:$("#screen-chat")};
+  const flowBg=$("#flowBg"), screens={landing:$("#screen-landing"),login:$("#screen-login"),otp:$("#screen-otp"),signup:$("#screen-signup"),forgot:$("#screen-forgot"),reset:$("#screen-reset"),chat:$("#screen-chat")};
   let screenMotionTimer=null;
-  function showScreen(name){clearTimeout(screenMotionTimer);Object.entries(screens).forEach(([k,el])=>{const active=k===name;el.hidden=!active;el.classList.remove("screen-motion-in");if(active){void el.offsetWidth;el.classList.add("screen-motion-in")}});flowBg?.classList.toggle("on",["login","otp","signup","forgot","reset"].includes(name));screenMotionTimer=setTimeout(()=>screens[name]?.classList.remove("screen-motion-in"),900)}
-  showScreen("login");
+  function showScreen(name){clearTimeout(screenMotionTimer);Object.entries(screens).forEach(([k,el])=>{if(!el)return;const active=k===name;el.hidden=!active;el.classList.remove("screen-motion-in");if(active){void el.offsetWidth;el.classList.add("screen-motion-in")}});flowBg?.classList.toggle("on",["login","otp","signup","forgot","reset"].includes(name));screenMotionTimer=setTimeout(()=>screens[name]?.classList.remove("screen-motion-in"),900)}
+
+  /* ---------- landing navigation ---------- */
+  $("#landingStart")?.addEventListener("click",()=>{showScreen("login");setTimeout(()=>$("#loginEmail")?.focus(),100)});
+  $("#landingLogin")?.addEventListener("click",()=>{showScreen("login");setTimeout(()=>$("#loginEmail")?.focus(),100)});
+  $("#landingSignup")?.addEventListener("click",()=>{showScreen("signup");setTimeout(()=>$("#signupName")?.focus(),100)});
+  $("#landingLogo")?.addEventListener("click",()=>{showScreen("landing");window.scrollTo({top:0,behavior:"smooth"})});
+  $("#landingView3D")?.addEventListener("click",()=>$("#landing3D")?.scrollIntoView({behavior:"smooth",block:"center"}));
+  document.querySelectorAll("[data-landing-scroll]").forEach(btn=>btn.addEventListener("click",()=>{const target=document.getElementById(btn.dataset.landingScroll);if(target)target.scrollIntoView({behavior:"smooth",block:"center"})}));
+
+  showScreen("landing");
 
   const loginForm=$("#loginForm"),loginEmail=$("#loginEmail"),loginPassword=$("#loginPassword"),loginSubmit=$("#loginSubmit"),loginErr=$("#loginErr");let pendingEmail="",pendingPassword="";
   function setErr(el,msg){el.innerHTML=msg?`<div class="form-err"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>${esc(String(msg))}</span></div>`:""}
@@ -1313,7 +1423,7 @@ fetch("/api/auth/reset-check",{method:"POST",headers:{"Content-Type":"applicatio
   document.getElementById('chatSortBtn')?.addEventListener('click',()=>{chatSortNewest=!chatSortNewest;renderChatList()});
 
   loadMessages();render();fit();renderChatList();
-  (async()=>{try{const r=await fetch('/api/auth/me');if(r.ok){const data=await r.json().catch(()=>({}));if(data.email)setAccountIdentity(data.email);enterChat();return}}catch(_){}showScreen('login')})();
+  (async()=>{try{const r=await fetch('/api/auth/me');if(r.ok){const data=await r.json().catch(()=>({}));if(data.email)setAccountIdentity(data.email);enterChat();return}}catch(_){}showScreen('landing')})();
   }
 })();
 </script>
